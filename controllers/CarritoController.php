@@ -65,7 +65,6 @@ class CarritoController
 
     public function sumar()
     {
-        session_start();
         $id = $_POST['id'];
 
         if (isset($_SESSION['cart'][$id])) {
@@ -77,7 +76,6 @@ class CarritoController
 
     public function restar()
     {
-        session_start();
         $id = $_POST['id'];
 
         if (isset($_SESSION['cart'][$id])) {

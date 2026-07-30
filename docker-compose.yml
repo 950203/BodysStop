@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_NAME=${DB_NAME:-bodyshop}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASS=${DB_PASS:-}
+    # Para usar MySQL de XAMPP en Windows, ejecutar:
+    #   $env:DB_HOST="host.docker.internal"
+    #   docker compose up
+    # Para usar MySQL del contenedor, descomentar db: y:
+    #   $env:DB_HOST="db"; $env:DB_PASS="root"
+    #   docker compose up
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+
+  # db:
+  #   image: mysql:8.0
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: bodyshop
+  #   ports:
+  #     - "3307:3306"
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     timeout: 10s
+  #     retries: 10
+
+# volumes:
+#   db_data:

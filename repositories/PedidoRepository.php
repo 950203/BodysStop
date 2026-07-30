@@ -1,17 +1,14 @@
 <?php
 
+require_once __DIR__ . '/../config/Database.php';
+
 class PedidoRepository
 {
-    private $db;
+    private PDO $db;
 
     public function __construct()
     {
-        $this->db = new PDO(
-            "mysql:host=host.docker.internal;dbname=bodyshop;charset=utf8",
-            "root",
-            "root",
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
+        $this->db = Database::getConexion();
     }
 
     public function guardarPedido($cliente, $cart)
@@ -24,7 +21,6 @@ class PedidoRepository
                 $total += $item['subtotal'];
             }
 
-            // Pedido
             $stmt = $this->db->prepare(
                 "INSERT INTO pedidos (nombre_cliente, email, direccion, total)
                  VALUES (?, ?, ?, ?)"
@@ -38,7 +34,6 @@ class PedidoRepository
 
             $pedidoId = $this->db->lastInsertId();
 
-            // Detalle
             $stmtDetalle = $this->db->prepare(
                 "INSERT INTO pedido_detalle
                 (pedido_id, producto_id, cantidad, precio, subtotal)

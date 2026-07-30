@@ -1,6 +1,6 @@
 <?php
 
-use PSpell\Config;
+require_once __DIR__ . '/../config/Database.php';
 
 abstract class Model
 {
@@ -8,6 +8,6 @@ abstract class Model
 
     public function __construct()
     {
-        $this->db = conexion::getConexion();
+        $this->db = Database::getConexion();
     }
 }
