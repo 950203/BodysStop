@@ -47,7 +47,7 @@ $count = array_sum($_SESSION['cart'] ?? []);
 
         <div class="cart-wrapper">
             <a href="/?c=Carrito&m=index" class="cart-link">
-                🛒 <span id="cart-count">0</span>
+                🛒 <span id="cart-count"><?= $count ?></span>
             </a>
             <div id="mini-cart" class="mini-cart"></div>
         </div>

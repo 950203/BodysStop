@@ -1,73 +1,63 @@
-<!DOCTYPE html>
-<html lang="es">
+<?php require BASE_PATH . '/views/layouts/header.php'; ?>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Checkout | BodyShop</title>
-
-    <style>
-        body {
-            font-family: Arial;
-            background: #fafafa;
-            padding: 40px;
-        }
-
-        form {
-            background: white;
-            padding: 30px;
-            max-width: 500px;
-            margin: auto;
-        }
-
-        input,
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            background: black;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>💳 Checkout</h1>
+<div class="checkout-container">
+    <h1>Checkout</h1>
 
     <form id="checkoutForm">
-        <input type="text" name="nombre" placeholder="Nombre completo" required>
-        <input type="email" name="email" placeholder="Correo" required>
-        <input type="text" name="direccion" placeholder="Dirección de envío" required>
+        <div class="form-group">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej: María Pérez" required>
+        </div>
 
-        <button type="submit">Confirmar compra</button>
+        <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" placeholder="Ej: maria@gmail.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="direccion">Dirección de envío</label>
+            <textarea id="direccion" name="direccion" rows="3" placeholder="Ej: Cra 123 # 45-67" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-checkout">
+            <i class="fas fa-lock me-2"></i>Confirmar compra
+        </button>
     </form>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.getElementById('checkoutForm').addEventListener('submit', e => {
-            e.preventDefault();
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('checkoutForm').addEventListener('submit', e => {
+        e.preventDefault();
 
-            fetch('/?c=Checkout&m=process', {
-                    method: 'POST'
-                })
-                .then(r => r.json())
-                .then(() => {
-                    Swal.fire(
-                        'Compra exitosa 🎉',
-                        'Gracias por tu compra',
-                        'success'
-                    ).then(() => {
-                        window.location.href = '/';
-                    });
+        const form = e.target;
+        const data = new URLSearchParams(new FormData(form));
+
+        fetch('/?c=Checkout&m=process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: data
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Compra exitosa',
+                    text: 'Gracias por tu compra',
+                    timer: 2500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '/';
                 });
+            } else {
+                Swal.fire('Error', res.error || 'Ocurrió un error', 'error');
+            }
+        })
+        .catch(() => {
+            Swal.fire('Error', 'No se pudo procesar la compra', 'error');
         });
-    </script>
+    });
+</script>
 
-</body>
-
-</html>
+<?php require BASE_PATH . '/views/layouts/footer.php'; ?>

@@ -1,81 +1,17 @@
-<!DOCTYPE html>
-<html lang="es">
+<?php require BASE_PATH . '/views/layouts/header.php'; ?>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Carrito | BodyShop</title>
-    <link rel="stylesheet" href="/css/app.css">
-    <?php require BASE_PATH . '/views/layouts/header.php'; ?>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f5f5f5;
-            /* padding: 40px; */
-        }
-
-        .cart-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        table {
-            width: 100%;
-            background: #fff;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        th,
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background: #000;
-            color: #fff;
-        }
-
-        .total {
-            text-align: right;
-            font-size: 20px;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 8px 14px;
-            cursor: pointer;
-            border: none;
-        }
-
-        .danger {
-            background: #c0392b;
-            color: white;
-        }
-
-        .success {
-            background: #000;
-            color: white;
-        }
-
-        a {
-            text-decoration: none;
-            color: white;
-        }
-    </style>
-</head>
-
-<body>
-
-    <h1>🛒 Tu carrito</h1>
+<div class="cart-container">
+    <h1 class="text-center mb-4 fw-light" style="letter-spacing:1px;">Tu Carrito</h1>
 
     <?php if (empty($items)): ?>
-        <p>Tu carrito está vacío.</p>
+        <div class="empty-cart">
+            <i class="fas fa-shopping-bag"></i>
+            <p class="fs-5 text-muted">Tu carrito está vacío</p>
+            <a href="/?c=Producto&m=index" class="btn btn-dark mt-2">Ver tienda</a>
+        </div>
     <?php else: ?>
-        <div class="cart-container">
-            <table>
+        <table class="cart-table">
+            <thead>
                 <tr>
                     <th>Producto</th>
                     <th>Precio</th>
@@ -83,93 +19,51 @@
                     <th>Subtotal</th>
                     <th></th>
                 </tr>
-
+            </thead>
+            <tbody>
                 <?php foreach ($items as $item): ?>
                     <tr id="row-<?= $item['id'] ?>">
-                        <td><?= $item['nombre'] ?></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="<?= htmlspecialchars($item['imagen']) ?>"
+                                     alt="<?= htmlspecialchars($item['nombre']) ?>"
+                                     style="width:48px;height:48px;object-fit:cover;border-radius:8px;">
+                                <span class="fw-semibold"><?= htmlspecialchars($item['nombre']) ?></span>
+                            </div>
+                        </td>
                         <td>$<?= number_format($item['precio']) ?></td>
                         <td>
-                            <button onclick="restar(<?= $item['id'] ?>)">−</button>
-                            <?= $item['qty'] ?>
-                            <button onclick="sumar(<?= $item['id'] ?>)">+</button>
+                            <button class="qty-btn" onclick="restar(<?= $item['id'] ?>)">−</button>
+                            <span class="mx-2 fw-bold"><?= $item['qty'] ?></span>
+                            <button class="qty-btn" onclick="sumar(<?= $item['id'] ?>)">+</button>
                         </td>
-                        <td class="subtotal">$<?= number_format($item['subtotal']) ?></td>
+                        <td class="subtotal fw-bold">$<?= number_format($item['subtotal']) ?></td>
                         <td>
-                            <button class="danger" onclick="removeItem(<?= $item['id'] ?>)">X</button>
+                            <button class="btn-remove" onclick="removeItem(<?= $item['id'] ?>)">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach ?>
+            </tbody>
+        </table>
 
-            </table>
-
-            <div class="total">
-                <strong>Total: $<?= number_format($total) ?></strong>
-            </div>
-
-            <br>
-
-            <button class="success">
-                <a href="/?c=Checkout&m=index">Ir al checkout</a>
-            </button>
-
-        <?php endif ?>
+        <div class="cart-total">
+            <strong>Total: $<?= number_format($total) ?></strong>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            function removeItem(id) {
-                fetch('/?c=Carrito&m=remove', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: 'id=' + id
-                    })
-                    .then(res => res.json())
-                    .then(() => {
-                        const row = document.getElementById('row-' + id);
-                        row.classList.add('removing');
 
-                        setTimeout(() => {
-                            row.remove();
-                            updateCartCount();
-                            recalcularTotal();
-                        }, 300);
-                    });
-            }
+        <div class="d-flex justify-content-between mt-3">
+            <a href="/?c=Producto&m=index" class="btn btn-outline-dark">
+                <i class="fas fa-arrow-left me-1"></i> Seguir comprando
+            </a>
+            <a href="/?c=Checkout&m=index" class="btn btn-dark">
+                Ir al checkout <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/cart.js"></script>
 
-            function sumar(id) {
-                fetch('/?c=Carrito&m=sumar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: 'id=' + id
-                }).then(() => location.reload());
-            }
-
-            function restar(id) {
-                fetch('/?c=Carrito&m=restar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: 'id=' + id
-                }).then(() => location.reload());
-            }
-
-            function recalcularTotal() {
-                let total = 0;
-
-                document.querySelectorAll('.subtotal').forEach(td => {
-                    total += parseInt(td.textContent.replace(/\D/g, ''));
-                });
-
-                document.querySelector('.total strong').textContent =
-                    'Total: $' + total.toLocaleString();
-            }
-        </script>
-
-</body>
-
-</html>
+<?php require BASE_PATH . '/views/layouts/footer.php'; ?>
