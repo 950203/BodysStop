@@ -26,6 +26,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/validacion.js"></script>
 <script>
     document.getElementById('checkoutForm').addEventListener('submit', e => {
         e.preventDefault();
@@ -33,9 +34,13 @@
         const form = e.target;
         const data = new URLSearchParams(new FormData(form));
 
+        const h = { 'Content-Type': 'application/x-www-form-urlencoded' };
+        if (window.API_TOKEN) h['X-Auth-Token'] = window.API_TOKEN;
+        if (window.CSRF_TOKEN) h['X-CSRF-Token'] = window.CSRF_TOKEN;
+
         fetch('/?c=Checkout&m=process', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: h,
             body: data
         })
         .then(r => r.json())

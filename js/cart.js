@@ -1,13 +1,22 @@
-function addToCart(id) {
-    fetch('/?c=Carrito&m=agregar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.ok) {
-            updateCartCount();
+function headers() {
+    const h = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    if (window.API_TOKEN) h['X-Auth-Token'] = window.API_TOKEN;
+    if (window.CSRF_TOKEN) h['X-CSRF-Token'] = window.CSRF_TOKEN;
+    return h;
+}
+
+function requiereLogin() {
+    if (!window.API_TOKEN) {
+        window.location.href = '/?c=Auth&m=login';
+        return true;
+    }
+    return false;
+}
+
+function notificar(data) {
+    if (data.ok) {
+        updateCartCount();
+        if (typeof Swal !== 'undefined') {
             Swal.fire({
                 icon: 'success',
                 title: 'Agregado al carrito',
@@ -17,11 +26,31 @@ function addToCart(id) {
                 timer: 2000
             });
         }
-    });
+    } else if (data.error && typeof Swal !== 'undefined') {
+        Swal.fire({ icon: 'error', title: 'No se pudo agregar', text: data.error });
+    }
+}
+
+function addToCart(id, talla, qty) {
+    if (requiereLogin()) return;
+
+    const body = new URLSearchParams({ id: id });
+    if (talla) body.set('talla', talla);
+    if (qty) body.set('qty', qty);
+
+    fetch('/?c=Carrito&m=agregar', {
+        method: 'POST',
+        headers: headers(),
+        body: body
+    })
+    .then(r => r.json())
+    .then(notificar);
 }
 
 function updateCartCount() {
-    fetch('/?c=Carrito&m=count')
+    if (!window.API_TOKEN) return;
+
+    fetch('/?c=Carrito&m=count', { headers: headers() })
         .then(r => r.text())
         .then(count => {
             const el = document.getElementById('cart-count');
@@ -33,11 +62,11 @@ function updateCartCount() {
         });
 }
 
-function removeFromCart(id) {
+function removeFromCart(clave) {
     fetch('/?c=Carrito&m=remove', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave)
     })
     .then(r => r.json())
     .then(data => {
@@ -46,18 +75,18 @@ function removeFromCart(id) {
 }
 
 function clearCart() {
-    fetch('/?c=Carrito&m=clear', { method: 'POST' })
+    fetch('/?c=Carrito&m=clear', { method: 'POST', headers: headers() })
     .then(r => r.json())
     .then(data => {
         if (data.ok) location.reload();
     });
 }
 
-function updateQty(id, qty) {
+function updateQty(clave, qty) {
     fetch('/?c=Carrito&m=updateQty', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id + '&qty=' + qty
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave) + '&qty=' + qty
     })
     .then(r => r.json())
     .then(data => {
@@ -65,31 +94,31 @@ function updateQty(id, qty) {
     });
 }
 
-function sumar(id) {
+function sumar(clave) {
     fetch('/?c=Carrito&m=sumar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave)
     }).then(() => location.reload());
 }
 
-function restar(id) {
+function restar(clave) {
     fetch('/?c=Carrito&m=restar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave)
     }).then(() => location.reload());
 }
 
-function removeItem(id) {
+function removeItem(clave) {
     fetch('/?c=Carrito&m=remove', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave)
     })
     .then(res => res.json())
     .then(() => {
-        const row = document.getElementById('row-' + id);
+        const row = document.getElementById('row-' + CSS.escape(clave));
         if (row) {
             row.classList.add('row-fade-out');
             setTimeout(() => {
@@ -111,28 +140,28 @@ function recalcularTotal() {
     el.textContent = 'Total: $' + total.toLocaleString();
 }
 
-function changeMiniQty(id, delta) {
-    const span = document.querySelector('#mini-item-' + id + ' .qty');
+function changeMiniQty(clave, delta) {
+    const span = document.querySelector('#mini-item-' + CSS.escape(clave) + ' .qty');
     if (!span) return;
     let qty = parseInt(span.textContent) + delta;
     if (qty <= 0) {
-        removeMini(id);
+        removeMini(clave);
         return;
     }
     fetch('/?c=Carrito&m=updateQty', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id + '&qty=' + qty
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave) + '&qty=' + qty
     })
     .then(r => r.json())
     .then(() => { updateCartCount(); location.reload(); });
 }
 
-function removeMini(id) {
+function removeMini(clave) {
     fetch('/?c=Carrito&m=remove', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + id
+        headers: headers(),
+        body: 'id=' + encodeURIComponent(clave)
     })
     .then(r => r.json())
     .then(() => { updateCartCount(); location.reload(); });

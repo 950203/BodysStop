@@ -1,7 +1,17 @@
 <?php
 
+require_once BASE_PATH . '/core/Auth.php';
+require_once BASE_PATH . '/core/Security.php';
+require_once BASE_PATH . '/repositories/PedidoRepository.php';
+require_once BASE_PATH . '/repositories/ProductoRepository.php';
+
 class CheckoutController
 {
+    public function __construct()
+    {
+        Auth::requireLogin([Auth::ROL_USUARIO]);
+    }
+
     public function index()
     {
         if (empty($_SESSION['cart'])) {
@@ -14,6 +24,9 @@ class CheckoutController
 
     public function process()
     {
+        Auth::requireToken();
+        Security::requireCsrf();
+
         if (empty($_SESSION['cart'])) {
             echo json_encode(['ok' => false, 'error' => 'Carrito vacío']);
             exit;
@@ -29,28 +42,31 @@ class CheckoutController
         }
 
         $repo = new PedidoRepository();
+        $repoProductos = new ProductoRepository();
         $cart = [];
 
-        foreach ($_SESSION['cart'] as $id => $qty) {
-            $producto = (new ProductoRepository())->find($id);
+        foreach ($_SESSION['cart'] as $clave => $qty) {
+            [$id, $talla] = array_pad(explode(':', $clave, 2), 2, '');
+            $producto = $repoProductos->find((int)$id);
             if ($producto) {
-                $producto['qty'] = $qty;
-                $producto['subtotal'] = $qty * $producto['precio'];
+                $producto['talla'] = $talla;
+                $producto['qty'] = (int)$qty;
+                $producto['subtotal'] = (int)$qty * $producto['precio'];
                 $cart[] = $producto;
             }
         }
 
-        $ok = $repo->guardarPedido([
+        $resultado = $repo->guardarPedido([
             'nombre' => $nombre,
             'email' => $email,
             'direccion' => $direccion
-        ], $cart);
+        ], $cart, Auth::id());
 
-        if ($ok) {
+        if ($resultado['ok']) {
             $_SESSION['cart'] = [];
             echo json_encode(['ok' => true]);
         } else {
-            echo json_encode(['ok' => false, 'error' => 'Error al guardar el pedido']);
+            echo json_encode(['ok' => false, 'error' => $resultado['error'] ?? 'Error al guardar el pedido']);
         }
     }
 }

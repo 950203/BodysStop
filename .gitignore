@@ -1,0 +1,8 @@
+# Registros generados en desarrollo (correos de recuperación)
+logs/
+
+# Respaldos de la base de datos
+backups/
+
+# Archivos subidos por el panel admin
+public/uploads/

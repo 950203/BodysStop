@@ -332,6 +332,59 @@
     transition: 0.4s;
 }
 
+/* ========== Auth (login / registro) ========== */
+.auth-body {
+    background: linear-gradient(135deg, #fafafa 0%, #eee9e1 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-wrapper {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.auth-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-brand {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.auth-brand i {
+    font-size: 2.2rem;
+    color: #000;
+    background: #f4f1ec;
+    width: 64px;
+    height: 64px;
+    line-height: 64px;
+    border-radius: 50%;
+}
+
+.auth-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0.75rem 0 0.25rem;
+}
+
+.auth-brand p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
 /* ========== Carrito vacío ========== */
 .empty-cart {
     text-align: center;

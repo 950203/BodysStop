@@ -1,8 +1,84 @@
-<h1>➕ Nuevo producto</h1>
+<?php require BASE_PATH . '/views/layouts/header.php'; ?>
 
-<form method="POST" action="/?c=AdminProducto&m=store" enctype="multipart/form-data">
-    <input type="text" name="nombre" placeholder="Nombre" required>
-    <input type="number" name="precio" placeholder="Precio" required>
-    <input type="file" name="imagen" required>
-    <button>Guardar</button>
-</form>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-light mb-0" style="letter-spacing:1px;">Nuevo Producto</h1>
+        <a href="/?c=AdminProducto&m=index" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Volver</a>
+    </div>
+
+    <form method="POST" action="/?c=AdminProducto&m=store" enctype="multipart/form-data" class="row g-4" data-validar-producto>
+        <input type="hidden" name="csrf_token" value="<?= Security::csrfToken() ?>">
+        <input type="hidden" name="api_token" value="<?= Auth::apiToken() ?>">
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Nombre del producto</label>
+                        <input type="text" name="nombre" class="form-control" required minlength="3">
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Precio (COP)</label>
+                            <input type="number" name="precio" class="form-control" required min="1" step="0.01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Categoría</label>
+                            <select name="categoria_id" class="form-select">
+                                <option value="">Sin categoría</option>
+                                <?php foreach ($categorias as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['nombre']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Descripción</label>
+                        <textarea name="descripcion" class="form-control" rows="4" placeholder="Describe el producto..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Imagen</label>
+                        <input type="file" name="imagen" class="form-control" accept="image/*" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <strong><i class="fas fa-ruler me-2"></i> Stock por talla</strong>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2 mb-2">
+                        <div class="col-7"><small class="text-muted">Talla</small></div>
+                        <div class="col-5"><small class="text-muted">Stock</small></div>
+                    </div>
+                    <?php foreach (['XS', 'S', 'M', 'L', 'XL', 'XXL'] as $talla): ?>
+                        <div class="row g-2 mb-2 align-items-center">
+                            <div class="col-7">
+                                <span class="badge bg-light text-dark border"><?= $talla ?></span>
+                            </div>
+                            <div class="col-5">
+                                <input type="number" name="talla[<?= $talla ?>]" class="form-control form-control-sm" value="0" min="0">
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                    <small class="text-muted">Deja en 0 las tallas que no quieras ofrecer.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-dark px-4"><i class="fas fa-save me-1"></i> Guardar producto</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/validacion.js"></script>
+
+<?php require BASE_PATH . '/views/layouts/footer.php'; ?>

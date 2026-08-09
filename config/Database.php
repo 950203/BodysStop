@@ -12,7 +12,7 @@ class Database
             $user = getenv('DB_USER') ?: 'root';
             $pass = getenv('DB_PASS') ?: 'root';
             self::$db = new PDO(
-                "mysql:host=$host;dbname=$dbname;charset=utf8",
+                "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
                 $user,
                 $pass,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]

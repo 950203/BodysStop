@@ -3,17 +3,18 @@
 <?php else: ?>
 
     <?php foreach ($items as $item): ?>
-        <div class="mini-item" id="mini-item-<?= $item['id'] ?>">
-            <span><?= $item['nombre'] ?></span>
+        <?php $clave = htmlspecialchars($item['clave']); ?>
+        <div class="mini-item" id="mini-item-<?= $clave ?>">
+            <span><?= $item['nombre'] ?> <small class="text-muted">(<?= htmlspecialchars($item['talla']) ?>)</small></span>
 
             <div class="qty-controls">
-                <button onclick="changeMiniQty(<?= $item['id'] ?>, -1)">−</button>
+                <button onclick="changeMiniQty('<?= $clave ?>', -1)">−</button>
                 <span class="qty"><?= $item['qty'] ?></span>
-                <button onclick="changeMiniQty(<?= $item['id'] ?>, 1)">+</button>
+                <button onclick="changeMiniQty('<?= $clave ?>', 1)">+</button>
                 <small>× $<?= number_format($item['precio']) ?></small>
             </div>
 
-            <button onclick="removeMini(<?= $item['id'] ?>)">❌</button>
+            <button onclick="removeMini('<?= $clave ?>')">❌</button>
         </div>
     <?php endforeach ?>
 

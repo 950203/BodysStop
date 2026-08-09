@@ -1,74 +1,93 @@
 <?php
 
+require_once BASE_PATH . '/core/Auth.php';
+require_once BASE_PATH . '/core/Security.php';
+require_once BASE_PATH . '/repositories/ProductoRepository.php';
+
 class CarritoController
 {
-    private $repo;
+    private ProductoRepository $repo;
 
     public function __construct()
     {
+        Auth::requireLogin([Auth::ROL_USUARIO]);
+
         $this->repo = new ProductoRepository();
         $_SESSION['cart'] = $_SESSION['cart'] ?? [];
     }
 
+    // Agrega un producto con su talla al carrito
     public function agregar()
     {
-        $id = $_POST['id'];
+        Auth::requireToken();
+        Security::requireCsrf();
 
-        $_SESSION['cart'][$id] = ($_SESSION['cart'][$id] ?? 0) + 1;
+        $id = (int)($_POST['id'] ?? 0);
+        $talla = trim($_POST['talla'] ?? '');
+        $qty = max(1, (int)($_POST['qty'] ?? 1));
 
-        echo json_encode(['ok' => true]);
+        if (!$this->repo->find($id)) {
+            echo json_encode(['ok' => false, 'error' => 'Producto no encontrado']);
+            exit;
+        }
+
+        $stock = $this->repo->stockDe($id, $talla);
+        if ($talla === '' || $stock <= 0) {
+            echo json_encode(['ok' => false, 'error' => 'Talla no disponible']);
+            exit;
+        }
+
+        $clave = "$id:$talla";
+        $actual = $_SESSION['cart'][$clave] ?? 0;
+
+        if ($actual + $qty > $stock) {
+            echo json_encode(['ok' => false, 'error' => 'Solo hay ' . $stock . ' unidades en esa talla']);
+            exit;
+        }
+
+        $_SESSION['cart'][$clave] = $actual + $qty;
+        echo json_encode(['ok' => true, 'total_items' => array_sum($_SESSION['cart'])]);
     }
 
     public function index()
     {
-        $items = [];
-        $total = 0;
-
-        foreach ($_SESSION['cart'] as $id => $qty) {
-            $producto = $this->repo->find($id);
-            if ($producto) {
-                $producto['qty'] = $qty;
-                $producto['subtotal'] = $qty * $producto['precio'];
-                $total += $producto['subtotal'];
-                $items[] = $producto;
-            }
-        }
-
+        $items = $this->items();
+        $total = array_reduce($items, fn($acc, $i) => $acc + $i['subtotal'], 0);
         require BASE_PATH . '/views/carrito/index.php';
     }
 
     public function remove()
     {
-        $id = $_POST['id'];
-        unset($_SESSION['cart'][$id]);
+        Auth::requireToken();
+        Security::requireCsrf();
+
+        $clave = $_POST['id'] ?? '';
+        unset($_SESSION['cart'][$clave]);
         echo json_encode(['ok' => true]);
     }
 
     public function clear()
     {
+        Auth::requireToken();
+        Security::requireCsrf();
+
         $_SESSION['cart'] = [];
         echo json_encode(['ok' => true]);
     }
 
     public function count()
     {
-        $count = 0;
-
-        if (!empty($_SESSION['cart'])) {
-            foreach ($_SESSION['cart'] as $cantidad) {
-                $count += (int)$cantidad;
-            }
-        }
-
-        echo $count;
+        echo array_sum($_SESSION['cart'] ?? []);
     }
 
     public function sumar()
     {
-        $id = $_POST['id'];
+        Auth::requireToken();
+        Security::requireCsrf();
 
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id]++;
+        $clave = $_POST['id'] ?? '';
+        if (isset($_SESSION['cart'][$clave])) {
+            $this->incrementar($clave, 1);
         }
 
         echo 'ok';
@@ -76,14 +95,12 @@ class CarritoController
 
     public function restar()
     {
-        $id = $_POST['id'];
+        Auth::requireToken();
+        Security::requireCsrf();
 
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id]--;
-
-            if ($_SESSION['cart'][$id] <= 0) {
-                unset($_SESSION['cart'][$id]);
-            }
+        $clave = $_POST['id'] ?? '';
+        if (isset($_SESSION['cart'][$clave])) {
+            $this->incrementar($clave, -1);
         }
 
         echo 'ok';
@@ -91,33 +108,66 @@ class CarritoController
 
     public function mini()
     {
-        $items = [];
-        $total = 0;
-
-        foreach ($_SESSION['cart'] ?? [] as $id => $qty) {
-            $producto = $this->repo->find($id);
-            if ($producto) {
-                $producto['qty'] = $qty;
-                $producto['subtotal'] = $qty * $producto['precio'];
-                $total += $producto['subtotal'];
-                $items[] = $producto;
-            }
-        }
-
+        $items = $this->items();
+        $total = array_reduce($items, fn($acc, $i) => $acc + $i['subtotal'], 0);
         require BASE_PATH . '/views/carrito/mini.php';
     }
 
     public function updateQty()
     {
-        $id = $_POST['id'];
-        $qty = (int) $_POST['qty'];
+        Auth::requireToken();
+        Security::requireCsrf();
+
+        $clave = $_POST['id'] ?? '';
+        $qty = (int)$_POST['qty'] ?? 0;
 
         if ($qty <= 0) {
-            unset($_SESSION['cart'][$id]);
+            unset($_SESSION['cart'][$clave]);
         } else {
-            $_SESSION['cart'][$id] = $qty;
+            $this->incrementar($clave, $qty - (int)($_SESSION['cart'][$clave] ?? 0), true);
         }
 
         echo json_encode(['ok' => true]);
+    }
+
+    private function incrementar(string $clave, int $delta, bool $absoluto = false)
+    {
+        [$id, $talla] = array_pad(explode(':', $clave, 2), 2, '');
+        $id = (int)$id;
+
+        $nuevo = $absoluto ? $delta : (int)($_SESSION['cart'][$clave] ?? 0) + $delta;
+        $stock = $this->repo->stockDe($id, $talla);
+
+        if ($nuevo > $stock) {
+            $nuevo = max(1, $stock);
+        }
+
+        if ($nuevo <= 0) {
+            unset($_SESSION['cart'][$clave]);
+        } else {
+            $_SESSION['cart'][$clave] = $nuevo;
+        }
+    }
+
+    // Construye los items del carrito con su talla y subtotales
+    private function items(): array
+    {
+        $items = [];
+
+        foreach ($_SESSION['cart'] as $clave => $qty) {
+            [$id, $talla] = array_pad(explode(':', $clave, 2), 2, '');
+            $producto = $this->repo->find((int)$id);
+
+            if ($producto) {
+                $producto['clave'] = $clave;
+                $producto['talla'] = $talla;
+                $producto['qty'] = (int)$qty;
+                $producto['subtotal'] = (int)$qty * $producto['precio'];
+                $producto['stock'] = $this->repo->stockDe((int)$id, $talla);
+                $items[] = $producto;
+            }
+        }
+
+        return $items;
     }
 }
