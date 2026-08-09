@@ -1,5 +1,5 @@
 <footer class="footer">
-    <p>© <?= date('Y') ?> BodyShop - Todos los derechos reservados</p>
+    <p>© <?= date('Y') ?> BodyStop - Todos los derechos reservados</p>
 </footer>
 
 </body>

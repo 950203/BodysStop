@@ -7,7 +7,7 @@ class Mailer
     public static function send(string $para, string $asunto, string $html): bool
     {
         $host = getenv('MAIL_HOST');
-        $from = getenv('MAIL_FROM') ?: 'no-reply@bodyshop.local';
+        $from = getenv('MAIL_FROM') ?: 'no-reply@bodystop.local';
 
         if ($host) {
             return self::enviarSmtp($para, $asunto, $html, $from);
@@ -50,7 +50,7 @@ class Mailer
         $leer = fn() => fgets($socket, 512);
 
         $leer(); // banner
-        fwrite($socket, "EHLO bodyshop\r\n");
+        fwrite($socket, "EHLO bodystop\r\n");
         while (strpos($leer(), '250 ') === false) { /* espera respuesta final */ }
 
         if ($user) {

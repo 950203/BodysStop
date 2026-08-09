@@ -1,4 +1,4 @@
-# BodyShop — Manual de uso y funcionalidades
+# BodyStop — Manual de uso y funcionalidades
 
 E-commerce de bodys y prendas de control con roles, carrito con tallas/stock,
 recuperación de contraseña y panel de gestión de pedidos.
@@ -16,7 +16,7 @@ docker compose up -d --build
 | Servicio | Acceso |
 |---|---|
 | Tienda web | http://localhost:8080 |
-| MySQL | puerto `3307`, BD `bodyshop`, usuario `root` / `root` |
+| MySQL | puerto `3307`, BD `bodystop`, usuario `root` / `root` |
 
 > La base de datos se crea automáticamente desde `database.sql` la primera vez.
 > Si cambias `database.sql`, reconstruye el volumen:
@@ -26,8 +26,8 @@ docker compose up -d --build
 
 | Rol | Correo | Contraseña | Qué puede hacer |
 |---|---|---|---|
-| **administrador** | `admin@bodyshop.com` | `Admin123!` | Todo: usuarios, productos, pedidos, dashboard |
-| **vendedor** | `vendedor@bodyshop.com` | `Vendedor123!` | Productos, pedidos y dashboard |
+| **administrador** | `admin@bodystop.com` | `Admin123!` | Todo: usuarios, productos, pedidos, dashboard |
+| **vendedor** | `vendedor@bodystop.com` | `Vendedor123!` | Productos, pedidos y dashboard |
 | **usuario** (cliente) | *(regístrate en la tienda)* | — | Comprar, ver perfil y sus pedidos |
 
 > El registro público solo crea usuarios finales (`usuario`). Los vendedores los crea el administrador.
@@ -91,7 +91,7 @@ Script de PowerShell que genera un dump del contenedor MySQL y conserva los últ
 powershell -ExecutionPolicy Bypass -File scripts/backup-bd.ps1 -Mantener 10
 ```
 
-Los respaldos se guardan en `backups/` con nombre `bodyshop_YYYYMMDD_HHMMSS.sql`.
+Los respaldos se guardan en `backups/` con nombre `bodystop_YYYYMMDD_HHMMSS.sql`.
 Para automatizar, agrega el comando al Programador de tareas de Windows.
 
 ## Base de datos
@@ -124,6 +124,6 @@ backups/       Respaldos de la BD
 
 ## Notas
 
-- El rediseño visual de la tienda con el mockup **AURA** (`bodyshop/home.html`,
+- El rediseño visual de la tienda con el mockup **AURA** (`bodystop/home.html`,
   Tailwind) es una fase pendiente; el storefront actual usa Bootstrap.
 - Docker Desktop debe estar iniciado antes de levantar el proyecto.

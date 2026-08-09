@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>BodyShop | Bodys para Damas</title>
+    <title>BodyStop | Bodys para Damas</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -100,7 +100,7 @@
 <body>
 
 <header>
-    <h1>BodyShop</h1>
+    <h1>BodyStop</h1>
     <a href="/?c=Producto&m=index">Ver tienda</a>
 </header>
 
@@ -116,7 +116,7 @@
 </section>
 
 <footer>
-    © <?= date('Y') ?> BodyShop · Moda femenina
+    © <?= date('Y') ?> BodyStop · Moda femenina
 </footer>
 
 </body>

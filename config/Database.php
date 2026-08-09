@@ -8,7 +8,7 @@ class Database
     {
         if (self::$db === null) {
             $host = getenv('DB_HOST') ?: 'db';
-            $dbname = getenv('DB_NAME') ?: 'bodyshop';
+            $dbname = getenv('DB_NAME') ?: 'bodystop';
             $user = getenv('DB_USER') ?: 'root';
             $pass = getenv('DB_PASS') ?: 'root';
             self::$db = new PDO(

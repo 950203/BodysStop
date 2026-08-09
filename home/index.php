@@ -100,7 +100,7 @@
 <body>
 
 <header>
-    <h1>Bodyshop</h1>
+    <h1>BodyStop</h1>
     <a href="/?c=Producto&m=index">Ver tienda</a>
 </header>
 
@@ -116,7 +116,7 @@
 </section>
 
 <footer>
-    © <?= date('Y') ?> Bodyshop · Moda femenina
+    © <?= date('Y') ?> BodyStop · Moda femenina
 </footer>
 
 </body>

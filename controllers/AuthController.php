@@ -156,7 +156,7 @@ class AuthController
             $enlace = "http://" . ($_SERVER['HTTP_HOST'] ?? 'localhost:8080') . "/?c=Auth&m=reset&token=$token";
             $mailOk = Mailer::send(
                 $usuario['email'],
-                'Restablecer tu contraseña - BodyShop',
+                'Restablecer tu contraseña - BodyStop',
                 "<p>Hola {$usuario['nombre']},</p>
                  <p>Recibimos una solicitud para restablecer tu contraseña.</p>
                  <p><a href=\"$enlace\">Haz clic aquí para restablecerla</a></p>

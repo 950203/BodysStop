@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- Base de datos: `bodyshop`
--- E-commerce BodyShop con autenticación por roles, catálogo, tallas/stock y pedidos
+-- Base de datos: `bodystop`
+-- E-commerce BodyStop con autenticación por roles, catálogo, tallas/stock y pedidos
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 SET NAMES utf8mb4;
 
-USE `bodyshop`;
+USE `bodystop`;
 
 -- --------------------------------------------------------
 
@@ -34,8 +34,8 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`nombre`, `email`, `password_hash`, `rol`) VALUES
-('Administrador', 'admin@bodyshop.com', '$2y$10$2UOLBwBrZlfz6nYyeSMKQ.Sx2tSz4Tab3c6LgS6EdsvpYhaehJ1jS', 'administrador'),
-('Vendedor Demo', 'vendedor@bodyshop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'vendedor');
+('Administrador', 'admin@bodystop.com', '$2y$10$2UOLBwBrZlfz6nYyeSMKQ.Sx2tSz4Tab3c6LgS6EdsvpYhaehJ1jS', 'administrador'),
+('Vendedor Demo', 'vendedor@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'vendedor');
 
 -- --------------------------------------------------------
 

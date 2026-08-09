@@ -3,13 +3,13 @@ session_start();
 define('BASE_PATH', __DIR__);
 require_once BASE_PATH . '/core/Autoload.php';
 
-echo "<h1>Diagnóstico BD Bodyshop</h1>";
+echo "<h1>Diagnóstico BD BodyStop</h1>";
 
 try {
     $db = Database::getConexion();
     echo "<p style='color:green'>✔ Conexión a MySQL exitosa</p>";
 
-    $dbname = getenv('DB_NAME') ?: 'bodyshop';
+    $dbname = getenv('DB_NAME') ?: 'bodystop';
 
     // Mostrar tablas existentes
     $tables = $db->query("SHOW TABLES FROM `$dbname`")->fetchAll(PDO::FETCH_COLUMN);

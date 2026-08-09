@@ -7,7 +7,7 @@ services:
       - .:/var/www/html
     environment:
       - DB_HOST=${DB_HOST:-db}
-      - DB_NAME=${DB_NAME:-bodyshop}
+      - DB_NAME=${DB_NAME:-bodystop}
       - DB_USER=${DB_USER:-root}
       - DB_PASS=${DB_PASS:-root}
     depends_on:
@@ -20,7 +20,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: bodyshop
+      MYSQL_DATABASE: bodystop
     ports:
       - "3307:3306"
     volumes:

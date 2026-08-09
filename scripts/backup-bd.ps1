@@ -1,5 +1,5 @@
 <#
-    BodyShop - Respaldo de la base de datos
+    BodyStop - Respaldo de la base de datos
     Genera un dump del contenedor MySQL a backups/ y conserva solo los últimos N.
 
     Uso:  powershell -ExecutionPolicy Bypass -File scripts/backup-bd.ps1 [-Mantener 10]
@@ -13,9 +13,9 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $dir = Join-Path $root 'backups'
 $contenedor = 'bodysstop-db-1'
-$base = 'bodyshop'
+$base = 'bodystop'
 $fecha = Get-Date -Format 'yyyyMMdd_HHmmss'
-$archivo = Join-Path $dir "bodyshop_$fecha.sql"
+$archivo = Join-Path $dir "bodystop_$fecha.sql"
 
 if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
 
@@ -32,7 +32,7 @@ $tam = [Math]::Round((Get-Item $archivo).Length / 1KB, 1)
 Write-Host "Respaldo creado: $archivo ($tam KB)" -ForegroundColor Green
 
 # Conserva solo los últimos $Mantener respaldos
-$viejos = Get-ChildItem -Path $dir -Filter 'bodyshop_*.sql' |
+$viejos = Get-ChildItem -Path $dir -Filter 'bodystop_*.sql' |
     Sort-Object LastWriteTime -Descending |
     Select-Object -Skip $Mantener
 

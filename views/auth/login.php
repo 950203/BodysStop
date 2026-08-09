@@ -8,7 +8,7 @@ $linkRecuperacion = $linkRecuperacion ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión | BodyShop</title>
+    <title>Iniciar sesión | BodyStop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/app.css">
@@ -19,7 +19,7 @@ $linkRecuperacion = $linkRecuperacion ?? null;
     <div class="auth-card">
         <div class="auth-brand">
             <i class="fas fa-store"></i>
-            <h1>BodyShop</h1>
+            <h1>BodyStop</h1>
             <p>Bienvenido de nuevo</p>
         </div>
 
