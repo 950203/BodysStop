@@ -28,6 +28,11 @@
                             <input type="text" name="nombre" class="form-control" required minlength="3">
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small text-muted">Marca / Nombre del negocio</label>
+                            <input type="text" name="marca" class="form-control" placeholder="Ej: Cuerpo Fino">
+                            <div class="form-text small">Esta marca se mostrará en sus productos.</div>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small text-muted">Correo electrónico</label>
                             <input type="email" name="email" class="form-control" required>
                         </div>
@@ -56,6 +61,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Nombre</th>
+                                <th>Marca</th>
                                 <th>Correo</th>
                                 <th>Rol</th>
                                 <th>Estado</th>
@@ -67,6 +73,7 @@
                                 <tr>
                                     <td><?= $u['id'] ?></td>
                                     <td class="fw-semibold"><?= Security::escape($u['nombre']) ?></td>
+                                    <td><?= !empty($u['marca']) ? Security::escape($u['marca']) : '<span class="text-muted">—</span>' ?></td>
                                     <td><?= Security::escape($u['email']) ?></td>
                                     <td>
                                         <select class="form-select form-select-sm rol-select" data-id="<?= $u['id'] ?>" <?= $u['id'] === Auth::id() ? 'disabled' : '' ?>>

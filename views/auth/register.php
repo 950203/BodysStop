@@ -37,6 +37,14 @@
             </div>
 
             <div class="mb-3">
+                <label class="form-label small text-muted">Número de cédula</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                    <input type="text" name="cedula" class="form-control" placeholder="Ej: 1023456789" required inputmode="numeric" pattern="[0-9]{7,10}" maxlength="10">
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label small text-muted">Correo electrónico</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>

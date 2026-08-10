@@ -22,6 +22,9 @@
 
         <div class="col-md-6">
             <h1 class="fw-light mb-2" style="letter-spacing:1px;"><?= htmlspecialchars($producto['nombre']) ?></h1>
+            <?php if (!empty($producto['marca'])): ?>
+                <p class="small text-muted mb-2"><i class="fas fa-store me-1"></i>Vendido por <strong><?= htmlspecialchars($producto['marca']) ?></strong></p>
+            <?php endif; ?>
             <p class="fs-3 fw-bold mb-3">$<?= number_format($producto['precio']) ?></p>
 
             <?php if ((int)$promedio['total'] > 0): ?>
@@ -33,6 +36,15 @@
 
             <p class="text-muted"><?= nl2br(htmlspecialchars($producto['descripcion'] ?? '')) ?></p>
 
+            <?php if (!empty($producto['material'])): ?>
+                <div class="border rounded-3 p-3 mb-4">
+                    <div class="fw-semibold small text-uppercase text-muted mb-2"><i class="fas fa-tag me-1"></i> Detalles del producto</div>
+                    <ul class="list-unstyled mb-0 small">
+                        <li class="mb-1"><i class="fas fa-tshirt me-2 text-secondary"></i><strong>Material:</strong> <?= htmlspecialchars($producto['material']) ?></li>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
             <?php $disponibles = array_filter($producto['tallas'] ?? [], fn($t) => (int)$t['stock'] > 0); ?>
             <?php if (empty($disponibles)): ?>
                 <div class="alert alert-warning py-2 small">Este producto está agotado.</div>
@@ -43,7 +55,7 @@
                         <?php foreach ($producto['tallas'] as $t): ?>
                             <?php if ((int)$t['stock'] > 0): ?>
                                 <button type="button" class="btn btn-sm btn-outline-dark rounded-pill talla-radio" data-talla="<?= htmlspecialchars($t['talla']) ?>">
-                                    <?= htmlspecialchars($t['talla']) ?>
+                                    <?= htmlspecialchars($t['talla']) ?> <span class="text-muted small">(<?= (int)$t['stock'] ?>)</span>
                                 </button>
                             <?php else: ?>
                                 <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" disabled title="Agotada">
@@ -52,6 +64,9 @@
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-box me-1"></i><?= array_sum(array_map(fn($t) => (int)$t['stock'], $producto['tallas'])) ?> unidades disponibles
+                    </small>
                 </div>
 
                 <div class="d-flex align-items-center gap-3 mb-4">

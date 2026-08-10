@@ -118,13 +118,16 @@ function removeItem(clave) {
     })
     .then(res => res.json())
     .then(() => {
-        const row = document.getElementById('row-' + CSS.escape(clave));
+        const row = document.getElementById('row-' + clave);
         if (row) {
             row.classList.add('row-fade-out');
             setTimeout(() => {
                 row.remove();
                 updateCartCount();
                 recalcularTotal();
+                if (document.querySelectorAll('.cart-table tbody tr').length === 0) {
+                    location.reload();
+                }
             }, 400);
         }
     });

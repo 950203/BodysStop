@@ -25,7 +25,7 @@
                     <select name="estado" class="form-select">
                         <option value="">Todos los estados</option>
                         <?php foreach ($estados as $e): ?>
-                            <option value="<?= $e ?>" <?= $estado === $e ? 'selected' : '' ?>><?= ucfirst($e) ?></option>
+                            <option value="<?= $e ?>" <?= $estado === $e ? 'selected' : '' ?>><?= match ($e) { 'en_camino' => 'En camino', default => ucfirst($e) } ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -44,6 +44,7 @@
                             <th>#</th>
                             <th>Cliente</th>
                             <th>Fecha</th>
+                            <th>Pago</th>
                             <th>Total</th>
                             <th>Estado</th>
                             <th class="text-end">Acciones</th>
@@ -52,7 +53,7 @@
                     <tbody>
                         <?php if (empty($pedidos)): ?>
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No hay pedidos que coincidan.</td>
+                                <td colspan="7" class="text-center text-muted py-4">No hay pedidos que coincidan.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($pedidos as $pedido): ?>
@@ -63,13 +64,33 @@
                                         <small class="text-muted"><?= Security::escape($pedido['email']) ?></small>
                                     </td>
                                     <td class="small"><?= date('d/m/Y H:i', strtotime($pedido['created_at'])) ?></td>
+                                    <td>
+                                        <?php if ($pedido['metodo_pago'] === 'nequi'): ?>
+                                            <span class="badge bg-success">Nequi</span>
+                                        <?php elseif ($pedido['metodo_pago'] === 'daviplata'): ?>
+                                            <span class="badge bg-danger">Daviplata</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">—</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="fw-bold">$<?= number_format($pedido['total']) ?></td>
                                     <td>
-                                        <select class="form-select form-select-sm estado-select" data-id="<?= $pedido['id'] ?>" style="width:130px;">
-                                            <?php foreach ($estados as $e): ?>
-                                                <option value="<?= $e ?>" <?= $pedido['estado'] === $e ? 'selected' : '' ?>><?= ucfirst($e) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <?php $esAdmin = Auth::rol() === Auth::ROL_ADMIN; ?>
+                                        <?php if ($esAdmin): ?>
+                                            <select class="form-select form-select-sm estado-select" data-id="<?= $pedido['id'] ?>" style="width:130px;">
+                                                <?php foreach ($estados as $e): ?>
+                                                    <option value="<?= $e ?>" <?= $pedido['estado'] === $e ? 'selected' : '' ?>><?= match ($e) { 'en_camino' => 'En camino', default => ucfirst($e) } ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php else: ?>
+                                            <span class="badge <?= match ($pedido['estado']) {
+                                                'pagado' => 'bg-success',
+                                                'en_camino' => 'bg-primary',
+                                                'entregado' => 'bg-secondary',
+                                                'cancelado' => 'bg-danger',
+                                                default => 'bg-warning text-dark',
+                                            } ?>"><?= match ($pedido['estado']) { 'en_camino' => 'En camino', default => ucfirst($pedido['estado']) } ?></span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="text-end">
                                         <a href="/?c=AdminPedido&m=ver&id=<?= $pedido['id'] ?>" class="btn btn-sm btn-outline-secondary" title="Ver detalle"><i class="fas fa-eye"></i></a>

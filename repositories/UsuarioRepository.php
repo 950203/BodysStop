@@ -13,7 +13,7 @@ class UsuarioRepository
 
     public function all(): array
     {
-        $stmt = $this->db->query("SELECT id, nombre, email, rol, activo, created_at FROM usuarios ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT id, nombre, marca, email, rol, activo, created_at FROM usuarios ORDER BY id DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -23,7 +23,7 @@ class UsuarioRepository
         $offset = max(0, ($pagina - 1) * $porPagina);
 
         $stmt = $this->db->prepare(
-            "SELECT id, nombre, email, rol, activo, created_at
+            "SELECT id, nombre, marca, email, rol, activo, created_at
              FROM usuarios ORDER BY id DESC LIMIT $porPagina OFFSET $offset"
         );
         $stmt->execute();
@@ -66,18 +66,50 @@ class UsuarioRepository
         return (int)$stmt->fetchColumn() > 0;
     }
 
+    public function cedulaExiste(string $cedula, ?int $exceptoId = null): bool
+    {
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE cedula = ?";
+        $params = [$cedula];
+        if ($exceptoId !== null) {
+            $sql .= " AND id != ?";
+            $params[] = $exceptoId;
+        }
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
     public function create(array $data): int
     {
         $stmt = $this->db->prepare(
-            "INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?, ?, ?, ?)"
+            "INSERT INTO usuarios (nombre, marca, cedula, email, password_hash, rol) VALUES (?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([
             $data['nombre'],
+            $data['marca'] ?? null,
+            $data['cedula'] ?? '',
             $data['email'],
             $data['password_hash'],
             $data['rol'] ?? 'usuario',
         ]);
         return (int)$this->db->lastInsertId();
+    }
+
+    // Vendedores activos con su marca (para el formulario de productos)
+    public function vendedores(): array
+    {
+        $stmt = $this->db->query(
+            "SELECT id, nombre, marca FROM usuarios WHERE rol = 'vendedor' AND activo = 1 ORDER BY nombre"
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function vendedor(int $id): ?array
+    {
+        $stmt = $this->db->prepare("SELECT id, nombre, marca FROM usuarios WHERE id = ? AND rol = 'vendedor'");
+        $stmt->execute([$id]);
+        $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $fila ?: null;
     }
 
     public function update(int $id, array $data): bool

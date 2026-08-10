@@ -8,25 +8,33 @@
     <form method="GET" class="row g-2 mb-4 justify-content-center">
         <input type="hidden" name="c" value="Producto">
         <input type="hidden" name="m" value="index">
-        <div class="col-md-6 col-lg-5">
+        <div class="col-md-5 col-lg-4">
             <div class="input-group">
                 <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
                 <input type="text" name="q" class="form-control" placeholder="Buscar producto..." value="<?= htmlspecialchars($busqueda) ?>">
-                <?php if ($categoriaId): ?>
-                    <input type="hidden" name="categoria" value="<?= $categoriaId ?>">
-                <?php endif; ?>
             </div>
+        </div>
+        <div class="col-md-3 col-lg-2">
+            <select name="talla" class="form-select" aria-label="Filtrar por talla">
+                <option value="">Todas las tallas</option>
+                <?php foreach (['XS', 'S', 'M', 'L', 'XL', 'XXL'] as $t): ?>
+                    <option value="<?= $t ?>" <?= $talla === $t ? 'selected' : '' ?>><?= $t ?></option>
+                <?php endforeach; ?>
+            </select>
         </div>
         <div class="col-auto">
             <button class="btn btn-dark"><i class="fas fa-filter me-1"></i> Buscar</button>
         </div>
+        <?php if ($categoriaId): ?>
+            <input type="hidden" name="categoria" value="<?= $categoriaId ?>">
+        <?php endif; ?>
     </form>
 
     <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
-        <a href="/?c=Producto&m=index<?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?>"
+        <a href="/?c=Producto&m=index<?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?><?= $talla ? '&talla=' . urlencode($talla) : '' ?>"
            class="btn btn-sm rounded-pill <?= !$categoriaId ? 'btn-dark' : 'btn-outline-dark' ?>">Todos</a>
         <?php foreach ($categorias as $cat): ?>
-            <a href="/?c=Producto&m=index&categoria=<?= $cat['id'] ?><?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?>"
+            <a href="/?c=Producto&m=index&categoria=<?= $cat['id'] ?><?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?><?= $talla ? '&talla=' . urlencode($talla) : '' ?>"
                class="btn btn-sm rounded-pill <?= $categoriaId === (int)$cat['id'] ? 'btn-dark' : 'btn-outline-dark' ?>">
                 <?= htmlspecialchars($cat['nombre']) ?> (<?= $cat['total_productos'] ?>)
             </a>
@@ -58,6 +66,9 @@
                             <h3 class="product-name">
                                 <a href="/?c=Producto&m=ver&id=<?= $p['id'] ?>" class="text-decoration-none text-dark"><?= htmlspecialchars($p['nombre']) ?></a>
                             </h3>
+                            <?php if (!empty($p['marca'])): ?>
+                                <div class="small text-muted mb-1"><i class="fas fa-store me-1"></i><?= htmlspecialchars($p['marca']) ?></div>
+                            <?php endif; ?>
                             <p class="product-price">$<?= number_format($p['precio']) ?></p>
                             <?php $disponible = array_filter($p['tallas'] ?? [], fn($t) => (int)$t['stock'] > 0); ?>
                             <?php if (empty($disponible)): ?>
@@ -78,7 +89,7 @@
                 <ul class="pagination justify-content-center">
                     <?php for ($i = 1; $i <= $paginas; $i++): ?>
                         <li class="page-item <?= $i === $pagina ? 'active' : '' ?>">
-                            <a class="page-link" href="/?c=Producto&m=index&pagina=<?= $i ?><?= $categoriaId ? '&categoria=' . $categoriaId : '' ?><?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?>"><?= $i ?></a>
+                            <a class="page-link" href="/?c=Producto&m=index&pagina=<?= $i ?><?= $categoriaId ? '&categoria=' . $categoriaId : '' ?><?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?><?= $talla ? '&talla=' . urlencode($talla) : '' ?>"><?= $i ?></a>
                         </li>
                     <?php endfor; ?>
                 </ul>

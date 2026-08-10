@@ -3,10 +3,8 @@
 <div class="container">
     <div class="main-card">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0 fw-bold"><i class="fas fa-boxes me-2"></i> Gestión de Productos</h2>
-            <a href="/?c=AdminProducto&m=create" class="btn btn-dark shadow-sm">
-                <i class="fas fa-plus me-1"></i> Nuevo Producto
-            </a>
+            <h2 class="mb-0 fw-bold"><i class="fas fa-boxes me-2"></i> Gestión de Stock</h2>
+            <span class="badge bg-dark"><i class="fas fa-user-tag me-1"></i> <?= Security::escape(Auth::nombre()) ?></span>
         </div>
 
         <div class="table-responsive">
@@ -16,10 +14,8 @@
                         <th width="80">Miniatura</th>
                         <th>Producto</th>
                         <th>Marca</th>
-                        <th>Categoría</th>
                         <th>Stock</th>
                         <th>Precio</th>
-                        <th>Estado</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -34,7 +30,7 @@
                             }
                             $tallasJson = htmlspecialchars(json_encode($stockArr), ENT_QUOTES);
                         ?>
-                        <tr id="row-<?= $p['id'] ?>">
+                        <tr>
                             <td>
                                 <img src="<?= $p['imagen'] ?>" class="product-img border" alt="producto">
                             </td>
@@ -43,7 +39,6 @@
                                 <small class="text-muted">SKU: <?= str_pad($p['id'], 5, "0", STR_PAD_LEFT) ?></small>
                             </td>
                             <td><?= !empty($p['marca']) ? '<span class="badge bg-dark">' . htmlspecialchars($p['marca']) . '</span>' : '<span class="text-muted">—</span>' ?></td>
-                            <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($p['categoria_nombre'] ?? '—') ?></span></td>
                             <td>
                                 <?php $stock = (int)($p['stock_total'] ?? 0); ?>
                                 <span class="badge <?= $stock > 0 ? 'bg-success' : 'bg-danger' ?>">
@@ -65,31 +60,10 @@
                                     $<?= number_format($p['precio'], 2) ?>
                                 </span>
                             </td>
-                            <td>
-                                <?php if ((int)$p['activo'] === 1): ?>
-                                    <span class="badge bg-success">Activo</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary">Inactivo</span>
-                                <?php endif; ?>
-                            </td>
                             <td class="text-end">
-                                <?php if (Auth::rol() === Auth::ROL_ADMIN): ?>
-                                    <button onclick="abrirStock(<?= $p['id'] ?>, <?= $tallasJson ?>)"
-                                        class="btn btn-outline-success btn-action me-1" title="Editar stock">
-                                        <i class="fas fa-boxes"></i>
-                                    </button>
-                                <?php endif; ?>
-                                <button onclick="toggleProducto(<?= $p['id'] ?>, <?= (int)$p['activo'] ?>)"
-                                    class="btn btn-outline-secondary btn-action me-1" title="<?= (int)$p['activo'] === 1 ? 'Ocultar' : 'Activar' ?>">
-                                    <i class="fas <?= (int)$p['activo'] === 1 ? 'fa-eye-slash' : 'fa-eye' ?>"></i>
-                                </button>
-                                <a href="/?c=AdminProducto&m=edit&id=<?= $p['id'] ?>"
-                                    class="btn btn-outline-primary btn-action me-1" title="Editar">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
-                                <button onclick="deleteProduct(<?= $p['id'] ?>)"
-                                    class="btn btn-outline-danger btn-action" title="Ocultar">
-                                    <i class="fas fa-trash-alt"></i>
+                                <button onclick="abrirStock(<?= $p['id'] ?>, <?= $tallasJson ?>)"
+                                    class="btn btn-outline-success btn-action" title="Editar stock">
+                                    <i class="fas fa-boxes me-1"></i> Editar stock
                                 </button>
                             </td>
                         </tr>
@@ -101,7 +75,7 @@
         <?php if (empty($productos)): ?>
             <div class="alert alert-light text-center border-dashed py-5">
                 <i class="fas fa-search fa-2x text-muted mb-2"></i>
-                <p class="mb-0">No se encontraron productos en la base de datos.</p>
+                <p class="mb-0">No se encontraron productos.</p>
             </div>
         <?php endif; ?>
 
@@ -110,7 +84,7 @@
                 <ul class="pagination justify-content-center mb-0">
                     <?php for ($i = 1; $i <= $paginas; $i++): ?>
                         <li class="page-item <?= $i === $pagina ? 'active' : '' ?>">
-                            <a class="page-link" href="/?c=AdminProducto&m=index&pagina=<?= $i ?>"><?= $i ?></a>
+                            <a class="page-link" href="/?c=AdminProducto&m=stock&pagina=<?= $i ?>"><?= $i ?></a>
                         </li>
                     <?php endfor; ?>
                 </ul>
@@ -126,48 +100,6 @@
         if (window.API_TOKEN) h['X-Auth-Token'] = window.API_TOKEN;
         if (window.CSRF_TOKEN) h['X-CSRF-Token'] = window.CSRF_TOKEN;
         return h;
-    }
-
-    function deleteProduct(id) {
-        Swal.fire({
-            title: '¿Ocultar producto?',
-            text: "El producto dejará de venderse en la tienda, pero no se borra.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#000',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, ocultar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('/?c=AdminProducto&m=delete', {
-                        method: 'POST',
-                        headers: apiHeaders(),
-                        body: 'id=' + id
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        const row = document.getElementById('row-' + id);
-                        if (row) {
-                            row.classList.add('row-fade-out');
-                            setTimeout(() => row.remove(), 400);
-                        }
-                        Swal.fire({ title: data.mensaje || 'Hecho', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
-                    });
-            }
-        });
-    }
-
-    function toggleProducto(id, activo) {
-        fetch('/?c=AdminProducto&m=toggleActivo', {
-                method: 'POST',
-                headers: apiHeaders(),
-                body: 'id=' + id + '&activo=' + (activo === 1 ? 0 : 1)
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.ok) location.reload();
-            });
     }
 
     let stockProductoId = null;

@@ -16,6 +16,15 @@
                     <p class="mb-1"><strong>Nombre:</strong> <?= Security::escape($pedido['nombre_cliente']) ?></p>
                     <p class="mb-1"><strong>Correo:</strong> <?= Security::escape($pedido['email']) ?></p>
                     <p class="mb-1"><strong>Dirección:</strong> <?= Security::escape($pedido['direccion']) ?></p>
+                    <p class="mb-1"><strong>Pago:</strong>
+                        <?php if ($pedido['metodo_pago'] === 'nequi'): ?>
+                            <span class="badge bg-success">Nequi</span>
+                        <?php elseif ($pedido['metodo_pago'] === 'daviplata'): ?>
+                            <span class="badge bg-danger">Daviplata</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary">—</span>
+                        <?php endif; ?>
+                    </p>
                     <p class="mb-1"><strong>Fecha:</strong> <?= date('d/m/Y H:i', strtotime($pedido['created_at'])) ?></p>
                 </div>
             </div>
@@ -23,18 +32,23 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white"><strong><i class="fas fa-truck me-2"></i> Estado del pedido</strong></div>
                 <div class="card-body">
-                    <select class="form-select estado-select mb-3" data-id="<?= $pedido['id'] ?>">
-                        <?php foreach (['pendiente', 'pagado', 'enviado', 'entregado', 'cancelado'] as $e): ?>
-                            <option value="<?= $e ?>" <?= $pedido['estado'] === $e ? 'selected' : '' ?>><?= ucfirst($e) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if (Auth::rol() === Auth::ROL_ADMIN): ?>
+                        <select class="form-select estado-select mb-3" data-id="<?= $pedido['id'] ?>">
+                            <?php foreach (['pendiente', 'pagado', 'en_camino', 'entregado', 'cancelado'] as $e): ?>
+                                <option value="<?= $e ?>" <?= $pedido['estado'] === $e ? 'selected' : '' ?>><?= match ($e) { 'en_camino' => 'En camino', default => ucfirst($e) } ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                     <span class="badge <?= match ($pedido['estado']) {
                         'pagado' => 'bg-success',
-                        'enviado' => 'bg-primary',
+                        'en_camino' => 'bg-primary',
                         'entregado' => 'bg-secondary',
                         'cancelado' => 'bg-danger',
                         default => 'bg-warning text-dark',
-                    } ?>"><?= Security::escape($pedido['estado']) ?></span>
+                    } ?>"><?= match ($pedido['estado']) { 'en_camino' => 'En camino', default => Security::escape($pedido['estado']) } ?></span>
+                    <?php if (Auth::rol() !== Auth::ROL_ADMIN): ?>
+                        <small class="d-block text-muted mt-2"><i class="fas fa-lock me-1"></i>El estado solo puede cambiarlo el administrador.</small>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -67,7 +67,7 @@ class Auth
                 header('Location: /?c=AdminUsuario&m=index');
                 break;
             case self::ROL_VENDEDOR:
-                header('Location: /?c=AdminProducto&m=index');
+                header('Location: /?c=AdminProducto&m=stock');
                 break;
             default:
                 header('Location: /?c=Carrito&m=index');

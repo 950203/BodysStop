@@ -41,7 +41,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white"><strong><i class="fas fa-chart-bar me-2"></i> Pedidos por estado</strong></div>
                 <div class="card-body">
-                    <?php $colores = ['pendiente' => 'warning', 'pagado' => 'success', 'enviado' => 'primary', 'entregado' => 'secondary', 'cancelado' => 'danger']; ?>
+                    <?php $colores = ['pendiente' => 'warning', 'pagado' => 'success', 'en_camino' => 'primary', 'entregado' => 'secondary', 'cancelado' => 'danger']; ?>
                     <?php if (empty($metricas['por_estado'])): ?>
                         <p class="text-muted text-center py-4 mb-0">Sin datos todavía.</p>
                     <?php else: ?>
@@ -50,7 +50,7 @@
                             <?php $pct = $total > 0 ? round($fila['cantidad'] / $total * 100) : 0; ?>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small mb-1">
-                                    <span><?= ucfirst($fila['estado']) ?></span>
+                                    <span><?= $fila['estado'] === 'en_camino' ? 'En camino' : ucfirst($fila['estado']) ?></span>
                                     <span class="text-muted"><?= $fila['cantidad'] ?> (<?= $pct ?>%)</span>
                                 </div>
                                 <div class="progress" style="height:8px;">

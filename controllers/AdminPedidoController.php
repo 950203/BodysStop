@@ -29,7 +29,7 @@ class AdminPedidoController
         $total = $data['total'];
         $paginas = $data['paginas'];
         $pagina = $data['pagina'];
-        $estados = ['pendiente', 'pagado', 'enviado', 'entregado', 'cancelado'];
+        $estados = ['pendiente', 'pagado', 'en_camino', 'entregado', 'cancelado'];
 
         require BASE_PATH . '/views/admin/pedidos/index.php';
     }
@@ -48,16 +48,22 @@ class AdminPedidoController
         require BASE_PATH . '/views/admin/pedidos/ver.php';
     }
 
-    // Cambio de estado (AJAX)
+    // Cambio de estado (AJAX) — solo el administrador gestiona los estados
     public function cambiarEstado()
     {
         Auth::requireLogin([Auth::ROL_VENDEDOR, Auth::ROL_ADMIN]);
         Auth::requireToken();
         Security::requireCsrf();
 
+        if (Auth::rol() !== Auth::ROL_ADMIN) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'error' => 'Solo el administrador puede gestionar los estados de los pedidos']);
+            exit;
+        }
+
         $id = (int)($_POST['id'] ?? 0);
         $estado = $_POST['estado'] ?? '';
-        $estadosValidos = ['pendiente', 'pagado', 'enviado', 'entregado', 'cancelado'];
+        $estadosValidos = ['pendiente', 'pagado', 'en_camino', 'entregado', 'cancelado'];
 
         if (!in_array($estado, $estadosValidos, true)) {
             echo json_encode(['ok' => false, 'error' => 'Estado inválido']);
@@ -69,6 +75,35 @@ class AdminPedidoController
         } else {
             echo json_encode(['ok' => false, 'error' => 'No se pudo actualizar el estado']);
         }
+    }
+
+    // Historial de ventas con resumen.
+    // El administrador puede filtrar por vendedor; el vendedor solo ve sus propias ventas.
+    public function ventas()
+    {
+        Auth::requireLogin([Auth::ROL_VENDEDOR, Auth::ROL_ADMIN]);
+
+        $vendedores = (new UsuarioRepository())->vendedores();
+
+        if (Auth::rol() === Auth::ROL_ADMIN) {
+            $vendedorFiltro = ($_GET['vendedor'] ?? '') !== '' ? (int)$_GET['vendedor'] : null;
+        } else {
+            $vendedorFiltro = Auth::id();
+        }
+
+        $ventas = $this->repo->historialVentas($vendedorFiltro);
+
+        $totalVentas = count($ventas);
+        $ingresos = array_sum(array_map(
+            fn($p) => array_sum(array_map(fn($d) => (float)$d['subtotal'], $p['detalle'])),
+            $ventas
+        ));
+        $unidades = array_sum(array_map(
+            fn($p) => array_sum(array_map(fn($d) => (int)$d['cantidad'], $p['detalle'])),
+            $ventas
+        ));
+
+        require BASE_PATH . '/views/admin/pedidos/ventas.php';
     }
 
     // Dashboard de métricas

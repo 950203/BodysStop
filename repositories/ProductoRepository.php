@@ -25,8 +25,8 @@ class ProductoRepository
         return $fila ?: null;
     }
 
-    // Catálogo con búsqueda, filtro por categoría y paginación
-    public function buscar(string $busqueda = '', ?int $categoriaId = null, int $pagina = 1, int $porPagina = 8): array
+    // Catálogo con búsqueda, filtro por categoría, por talla y paginación
+    public function buscar(string $busqueda = '', ?int $categoriaId = null, int $pagina = 1, int $porPagina = 8, ?string $talla = null): array
     {
         $sql = "SELECT p.*, c.nombre AS categoria_nombre
                 FROM productos p
@@ -44,6 +44,15 @@ class ProductoRepository
         if ($categoriaId !== null) {
             $sql .= " AND p.categoria_id = ?";
             $params[] = $categoriaId;
+        }
+
+        if ($talla !== null && $talla !== '') {
+            $sql .= " AND p.id IN (
+                SELECT DISTINCT pt.producto_id
+                FROM producto_tallas pt
+                WHERE pt.talla = ? AND pt.stock > 0
+            )";
+            $params[] = $talla;
         }
 
         $countSql = str_replace("SELECT p.*, c.nombre AS categoria_nombre", "SELECT COUNT(*)", $sql);

@@ -3,17 +3,28 @@
 require_once BASE_PATH . '/core/Auth.php';
 require_once BASE_PATH . '/core/Security.php';
 require_once BASE_PATH . '/repositories/ProductoRepository.php';
+require_once BASE_PATH . '/repositories/CarritoRepository.php';
 
 class CarritoController
 {
     private ProductoRepository $repo;
+    private CarritoRepository $repoBD;
 
     public function __construct()
     {
         Auth::requireLogin([Auth::ROL_USUARIO]);
 
         $this->repo = new ProductoRepository();
+        $this->repoBD = new CarritoRepository();
         $_SESSION['cart'] = $_SESSION['cart'] ?? [];
+    }
+
+    // Guarda el carrito de la sesión en la BD para que persista entre sesiones
+    private function sincronizarBD(): void
+    {
+        if (Auth::check()) {
+            $this->repoBD->guardar((int)Auth::id(), $_SESSION['cart'] ?? []);
+        }
     }
 
     // Agrega un producto con su talla al carrito
@@ -46,6 +57,7 @@ class CarritoController
         }
 
         $_SESSION['cart'][$clave] = $actual + $qty;
+        $this->sincronizarBD();
         echo json_encode(['ok' => true, 'total_items' => array_sum($_SESSION['cart'])]);
     }
 
@@ -63,6 +75,7 @@ class CarritoController
 
         $clave = $_POST['id'] ?? '';
         unset($_SESSION['cart'][$clave]);
+        $this->sincronizarBD();
         echo json_encode(['ok' => true]);
     }
 
@@ -72,6 +85,7 @@ class CarritoController
         Security::requireCsrf();
 
         $_SESSION['cart'] = [];
+        $this->sincronizarBD();
         echo json_encode(['ok' => true]);
     }
 
@@ -90,6 +104,7 @@ class CarritoController
             $this->incrementar($clave, 1);
         }
 
+        $this->sincronizarBD();
         echo 'ok';
     }
 
@@ -103,6 +118,7 @@ class CarritoController
             $this->incrementar($clave, -1);
         }
 
+        $this->sincronizarBD();
         echo 'ok';
     }
 
@@ -127,6 +143,7 @@ class CarritoController
             $this->incrementar($clave, $qty - (int)($_SESSION['cart'][$clave] ?? 0), true);
         }
 
+        $this->sincronizarBD();
         echo json_encode(['ok' => true]);
     }
 

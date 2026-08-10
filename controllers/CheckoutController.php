@@ -4,6 +4,7 @@ require_once BASE_PATH . '/core/Auth.php';
 require_once BASE_PATH . '/core/Security.php';
 require_once BASE_PATH . '/repositories/PedidoRepository.php';
 require_once BASE_PATH . '/repositories/ProductoRepository.php';
+require_once BASE_PATH . '/repositories/CarritoRepository.php';
 
 class CheckoutController
 {
@@ -35,9 +36,15 @@ class CheckoutController
         $nombre = $_POST['nombre'] ?? '';
         $email = $_POST['email'] ?? '';
         $direccion = $_POST['direccion'] ?? '';
+        $metodoPago = $_POST['metodo_pago'] ?? '';
 
         if (!$nombre || !$email || !$direccion) {
             echo json_encode(['ok' => false, 'error' => 'Completa todos los campos']);
+            exit;
+        }
+
+        if (!in_array($metodoPago, ['nequi', 'daviplata'], true)) {
+            echo json_encode(['ok' => false, 'error' => 'Selecciona un método de pago válido']);
             exit;
         }
 
@@ -59,11 +66,13 @@ class CheckoutController
         $resultado = $repo->guardarPedido([
             'nombre' => $nombre,
             'email' => $email,
-            'direccion' => $direccion
+            'direccion' => $direccion,
+            'metodo_pago' => $metodoPago
         ], $cart, Auth::id());
 
         if ($resultado['ok']) {
             $_SESSION['cart'] = [];
+            (new CarritoRepository())->vaciar((int)Auth::id());
             echo json_encode(['ok' => true]);
         } else {
             echo json_encode(['ok' => false, 'error' => $resultado['error'] ?? 'Error al guardar el pedido']);

@@ -7,6 +7,7 @@ require_once BASE_PATH . '/core/LoginLimiter.php';
 require_once BASE_PATH . '/core/Mailer.php';
 require_once BASE_PATH . '/repositories/UsuarioRepository.php';
 require_once BASE_PATH . '/repositories/PedidoRepository.php';
+require_once BASE_PATH . '/repositories/CarritoRepository.php';
 require_once BASE_PATH . '/repositories/ResetTokenRepository.php';
 
 class AuthController
@@ -106,6 +107,15 @@ class AuthController
 
         LoginLimiter::limpiar($email);
         Auth::login($usuario);
+
+        // Restaurar el carrito guardado en la BD (si existe)
+        if ($usuario['rol'] === Auth::ROL_USUARIO) {
+            $repoCarrito = new CarritoRepository();
+            $guardado = $repoCarrito->cargar((int)$usuario['id']);
+            $_SESSION['cart'] = array_merge($guardado, $_SESSION['cart'] ?? []);
+            $repoCarrito->guardar((int)$usuario['id'], $_SESSION['cart']);
+        }
+
         Auth::redirigirPorRol($usuario['rol']);
     }
 
@@ -114,11 +124,12 @@ class AuthController
         Security::requireCsrf();
 
         $nombre  = trim($_POST['nombre'] ?? '');
+        $cedula  = trim($_POST['cedula'] ?? '');
         $email   = strtolower(trim($_POST['email'] ?? ''));
         $clave   = $_POST['clave'] ?? '';
         $confirm = $_POST['clave_confirm'] ?? '';
 
-        $error = $this->validarRegistro($nombre, $email, $clave, $confirm);
+        $error = $this->validarRegistro($nombre, $cedula, $email, $clave, $confirm);
         if ($error !== null) {
             require BASE_PATH . '/views/auth/register.php';
             exit;
@@ -127,6 +138,7 @@ class AuthController
         // Solo se permite el registro de usuarios finales
         $id = $this->repo->create([
             'nombre' => $nombre,
+            'cedula' => $cedula,
             'email' => $email,
             'password_hash' => Security::hashPassword($clave),
             'rol' => Auth::ROL_USUARIO,
@@ -134,6 +146,12 @@ class AuthController
 
         $usuario = $this->repo->find($id);
         Auth::login($usuario);
+
+        // Guardar el carrito de la sesión (productos elegidos antes de registrarse)
+        if ($usuario['rol'] === Auth::ROL_USUARIO) {
+            (new CarritoRepository())->guardar((int)$usuario['id'], $_SESSION['cart'] ?? []);
+        }
+
         Auth::redirigirPorRol(Auth::ROL_USUARIO);
     }
 
@@ -273,10 +291,16 @@ class AuthController
     }
 
     // ===== Validación =====
-    private function validarRegistro(string $nombre, string $email, string $clave, string $confirm): ?string
+    private function validarRegistro(string $nombre, string $cedula, string $email, string $clave, string $confirm): ?string
     {
         if ($nombre === '' || strlen($nombre) < 3) {
             return 'El nombre debe tener al menos 3 caracteres.';
+        }
+        if ($cedula === '' || !ctype_digit($cedula) || strlen($cedula) < 7 || strlen($cedula) > 10) {
+            return 'Ingresa un número de cédula válido (7 a 10 dígitos).';
+        }
+        if ($this->repo->cedulaExiste($cedula)) {
+            return 'Ya existe una cuenta con esa cédula.';
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return 'Ingresa un correo electrónico válido.';

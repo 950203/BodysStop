@@ -397,3 +397,44 @@
     margin-bottom: 16px;
     color: #ccc;
 }
+
+/* ========== Botón flotante WhatsApp ========== */
+.wa-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 58px;
+    height: 58px;
+    background: #25d366;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+    text-decoration: none;
+    z-index: 999;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.wa-float:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 26px rgba(37, 211, 102, 0.6);
+    color: #fff;
+}
+
+/* ========== Métodos de pago ========== */
+.pago-opcion {
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.pago-opcion:hover {
+    border-color: #999;
+}
+
+.pago-opcion.pago-seleccionado {
+    border-color: #000;
+    box-shadow: 0 0 0 1px #000;
+}

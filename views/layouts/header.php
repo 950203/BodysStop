@@ -53,13 +53,21 @@ $count = array_sum($_SESSION['cart'] ?? []);
 
         <?php if ($logueado): ?>
 
-            <?php if (in_array($rol, [Auth::ROL_VENDEDOR, Auth::ROL_ADMIN], true)): ?>
+            <?php if ($rol === Auth::ROL_ADMIN): ?>
                 <a href="/?c=AdminProducto&m=index">Productos</a>
+                <a href="/?c=AdminProducto&m=stock">Stock</a>
                 <a href="/?c=AdminPedido&m=index">Pedidos</a>
+                <a href="/?c=AdminPedido&m=ventas">Ventas</a>
+                <a href="/?c=AdminPedido&m=dashboard">Dashboard</a>
+            <?php elseif ($rol === Auth::ROL_VENDEDOR): ?>
+                <a href="/?c=AdminProducto&m=stock">Stock</a>
+                <a href="/?c=AdminPedido&m=index">Pedidos</a>
+                <a href="/?c=AdminPedido&m=ventas">Ventas</a>
                 <a href="/?c=AdminPedido&m=dashboard">Dashboard</a>
             <?php endif ?>
 
             <?php if ($rol === Auth::ROL_ADMIN): ?>
+                <a href="/?c=AdminReporte&m=index">Reportes</a>
                 <a href="/?c=AdminUsuario&m=index">Usuarios</a>
             <?php endif ?>
 

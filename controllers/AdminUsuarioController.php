@@ -35,9 +35,14 @@ class AdminUsuarioController
         $nombre = trim($_POST['nombre'] ?? '');
         $email  = strtolower(trim($_POST['email'] ?? ''));
         $clave  = $_POST['clave'] ?? '';
+        $marca  = trim($_POST['marca'] ?? '');
 
         if ($nombre === '' || strlen($nombre) < 3) {
             header('Location: /?c=AdminUsuario&m=index&error=Nombre inválido.');
+            exit;
+        }
+        if (mb_strlen($marca) > 120) {
+            header('Location: /?c=AdminUsuario&m=index&error=La marca no puede superar 120 caracteres.');
             exit;
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $this->repo->emailExiste($email)) {
@@ -51,6 +56,7 @@ class AdminUsuarioController
 
         $this->repo->create([
             'nombre' => $nombre,
+            'marca' => $marca,
             'email' => $email,
             'password_hash' => Security::hashPassword($clave),
             'rol' => Auth::ROL_VENDEDOR,

@@ -1,3 +1,5 @@
+AddType image/svg+xml .svg
+
 RewriteEngine On
 
 # Permitir acceso a archivos reales (css, js, imagenes)

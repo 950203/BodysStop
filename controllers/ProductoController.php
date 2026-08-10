@@ -16,13 +16,14 @@ class ProductoController
     {
         $busqueda = trim($_GET['q'] ?? '');
         $categoriaId = isset($_GET['categoria']) && $_GET['categoria'] !== '' ? (int)$_GET['categoria'] : null;
+        $talla = trim($_GET['talla'] ?? '');
         $pagina = max(1, (int)($_GET['pagina'] ?? 1));
 
         if ($categoriaId === 0) {
             $categoriaId = null;
         }
 
-        $data = $this->repo->buscar($busqueda, $categoriaId, $pagina);
+        $data = $this->repo->buscar($busqueda, $categoriaId, $pagina, 8, $talla !== '' ? $talla : null);
         $productos = $data['productos'];
         $total = $data['total'];
         $paginas = $data['paginas'];

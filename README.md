@@ -26,9 +26,9 @@ docker compose up -d --build
 
 | Rol | Correo | Contraseña | Qué puede hacer |
 |---|---|---|---|
-| **administrador** | `admin@bodystop.com` | `Admin123!` | Todo: usuarios, productos, pedidos, dashboard |
-| **vendedor** | `vendedor@bodystop.com` | `Vendedor123!` | Productos, pedidos y dashboard |
-| **usuario** (cliente) | *(regístrate en la tienda)* | — | Comprar, ver perfil y sus pedidos |
+| **administrador** | `admin@BodyStop.com` | `Admin123!` | Todo: usuarios, productos (incl. stock), pedidos (incl. cambiar estados), dashboard |
+| **vendedor** | `vendedor@BodyStop.com` | `Vendedor123!` | Productos (stock solo lectura), pedidos y seguimiento (solo consulta), dashboard |
+| **usuario** (cliente) | *(regístrate en la tienda)* | — | Comprar, ver perfil y sus pedidos con seguimiento |
 
 > El registro público solo crea usuarios finales (`usuario`). Los vendedores los crea el administrador.
 
@@ -51,20 +51,34 @@ docker compose up -d --build
 
 - **Carrito con talla**: al agregar se elige la talla (XS–XL) y se valida el stock.
   El carrito distingue la misma prenda por talla (ej. `1:S` y `1:M`).
+- **Carrito persistente**: el carrito se guarda en la BD (`carrito_items`) con cada
+  cambio, de modo que sobrevive al cierre de sesión y se restaura al volver a entrar
+  (se fusiona con lo que hayas agregado en la sesión actual). Al pagar se vacía.
+- **Editar / eliminar del carrito**: botones **+ / −** para cambiar cantidades (con
+  tope en el stock) y ✕ para quitar un producto; también se puede vaciar.
 - **Checkout**: formulario de envío; al confirmar se **descuenta el stock** de cada
   talla dentro de la misma transacción (si falta stock, se cancela todo).
 - **Mi Perfil** (`/?c=Auth&m=perfil`):
   - Editar nombre y correo.
   - Cambiar contraseña (exige la contraseña actual; tras el cambio se emite un token nuevo).
   - Historial de pedidos con estado, tallas y subtotales.
+- **Seguimiento del pedido** (en Mi Perfil):
+  - Notificación del pedido en curso (preparación / en camino) con entrega estimada y
+    cuenta regresiva en vivo.
+  - Botón "Rastrear pedido" por pedido: ruta del envío (origen → dirección del cliente),
+    barra de avance por etapas y historial de eventos de seguimiento.
+  - Aviso de retraso si la fecha estimada ya venció y el pedido aún no se entrega.
 
 ### Vendedor y Administrador (panel de gestión)
 
 - **Dashboard** (`/?c=AdminPedido&m=dashboard`): total de pedidos, ingresos,
   completados, clientes, pedidos por estado (barras) y productos más vendidos.
 - **Pedidos** (`/?c=AdminPedido&m=index`): listado con filtro por estado y búsqueda por
-  #/cliente/correo; cambiar estado en línea (pendiente → pagado → enviado → entregado /
-  cancelado) y ver el detalle completo (cliente, dirección, tallas).
+  #/cliente/correo y ver el detalle completo (cliente, dirección, tallas).
+  - **Administrador**: además puede cambiar el estado en línea
+    (pendiente → pagado → en camino → entregado / cancelado); cada cambio registra
+    un evento en el seguimiento que ve el cliente.
+  - **Vendedor**: solo consulta el listado y el detalle (no cambia estados).
 - **Productos** (`/?c=AdminProducto&m=index`): crear/editar producto con categoría,
   descripción, imagen y **stock por talla**; eliminar (ocultar) con confirmación,
   listado paginado y activar/ocultar desde la lista.
@@ -97,14 +111,18 @@ Para automatizar, agrega el comando al Programador de tareas de Windows.
 ## Base de datos
 
 Tablas: `usuarios`, `auth_tokens`, `login_intentos`, `password_reset_tokens`,
-`categorias`, `productos`, `producto_tallas` (stock por talla), `pedidos`
-(con `estado`), `pedido_detalle` (con `talla`), `resenas`.
+`categorias`, `productos`, `producto_tallas` (stock por talla), `carrito_items`
+(carrito persistente), `pedidos` (con `estado` y `fecha_estimada_entrega`),
+`pedido_detalle` (con `talla`), `seguimiento_pedidos` (eventos del rastreo de
+envíos), `resenas`.
 
 ```
 usuarios 1──N auth_tokens            usuarios 1──N pedidos (usuario_id)
 usuarios 1──N password_reset_tokens  pedidos 1──N pedido_detalle
-categorias 1──N productos            productos 1──N producto_tallas
-productos 1──N resenas               usuarios 1──N resenas (usuario_id)
+categorias 1──N productos            pedidos 1──N seguimiento_pedidos
+productos 1──N resenas               usuarios 1──N carrito_items
+productos 1──N producto_tallas
+usuarios 1──N resenas (usuario_id)
 ```
 
 ## Estructura del proyecto

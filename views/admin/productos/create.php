@@ -35,6 +35,11 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label small text-muted">Material / Tela</label>
+                        <input type="text" name="material" class="form-control" placeholder="Ej: Encaje elástico, Algodón suave, Satín...">
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label small text-muted">Descripción</label>
                         <textarea name="descripcion" class="form-control" rows="4" placeholder="Describe el producto..."></textarea>
                     </div>
@@ -43,11 +48,30 @@
                         <label class="form-label small text-muted">Imagen</label>
                         <input type="file" name="imagen" class="form-control" accept="image/*" required>
                     </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Vendedor</label>
+                            <select name="vendedor_id" class="form-select" id="producto-vendedor">
+                                <option value="">Sin vendedor</option>
+                                <?php foreach ($vendedores as $v): ?>
+                                    <option value="<?= $v['id'] ?>" data-marca="<?= htmlspecialchars($v['marca'] ?? '') ?>">
+                                        <?= htmlspecialchars(($v['marca'] ? $v['marca'] . ' — ' : '') . $v['nombre']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Marca (nombre del vendedor)</label>
+                            <input type="text" name="marca" id="producto-marca" class="form-control" placeholder="Se llena al elegir vendedor">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-5">
+            <?php $soloLectura = Auth::rol() !== Auth::ROL_ADMIN; ?>
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
                     <strong><i class="fas fa-ruler me-2"></i> Stock por talla</strong>
@@ -63,11 +87,15 @@
                                 <span class="badge bg-light text-dark border"><?= $talla ?></span>
                             </div>
                             <div class="col-5">
-                                <input type="number" name="talla[<?= $talla ?>]" class="form-control form-control-sm" value="0" min="0">
+                                <input type="number" name="talla[<?= $talla ?>]" class="form-control form-control-sm" value="0" min="0" <?= $soloLectura ? 'disabled' : '' ?>>
                             </div>
                         </div>
                     <?php endforeach; ?>
-                    <small class="text-muted">Deja en 0 las tallas que no quieras ofrecer.</small>
+                    <?php if ($soloLectura): ?>
+                        <small class="text-muted d-block"><i class="fas fa-lock me-1"></i>El stock solo puede ser definido por el administrador.</small>
+                    <?php else: ?>
+                        <small class="text-muted">Deja en 0 las tallas que no quieras ofrecer.</small>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -80,5 +108,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/validacion.js"></script>
+<script>
+    // Al elegir vendedor, se autocompleta la marca
+    document.getElementById('producto-vendedor').addEventListener('change', function () {
+        const opt = this.options[this.selectedIndex];
+        document.getElementById('producto-marca').value = opt && opt.dataset.marca ? opt.dataset.marca : '';
+    });
+</script>
 
 <?php require BASE_PATH . '/views/layouts/footer.php'; ?>

@@ -50,11 +50,13 @@ const VALIDADORES = {
     // Registro
     '#register-form': form => {
         const nombre = form.querySelector('[name=nombre]');
+        const cedula = form.querySelector('[name=cedula]');
         const email = form.querySelector('[name=email]');
         const clave = form.querySelector('[name=clave]');
         const confirm = form.querySelector('[name=clave_confirm]');
 
         if (nombre.value.trim().length < 3) return marcarError(nombre, 'El nombre debe tener al menos 3 caracteres');
+        if (!/^\d{7,10}$/.test(cedula.value.trim())) return marcarError(cedula, 'Ingresa una cédula válida (7 a 10 dígitos)');
         if (!vEmail(email.value.trim())) return marcarError(email, 'Ingresa un correo válido');
         const err = vClave(clave.value);
         if (err) return marcarError(clave, err);
@@ -86,14 +88,14 @@ const VALIDADORES = {
         if (dir.value.trim().length < 5) return marcarError(dir, 'Escribe una dirección válida');
         return true;
     },
-    // Producto (admin): nombre, precio y al menos una talla con stock
+    // Producto (admin): nombre, precio y al menos una talla con stock (solo si es editable)
     'form[data-validar-producto]': form => {
         const nombre = form.querySelector('[name=nombre]');
         const precio = form.querySelector('[name=precio]');
         if (nombre.value.trim().length < 3) return marcarError(nombre, 'El nombre debe tener al menos 3 caracteres');
         if (!(parseFloat(precio.value) > 0)) return marcarError(precio, 'Ingresa un precio mayor a 0');
-        const tallas = [...form.querySelectorAll('[name^="talla["]')];
-        if (tallas.length === 0 || !tallas.some(t => parseInt(t.value) > 0)) {
+        const tallas = [...form.querySelectorAll('[name^="talla["]')].filter(t => !t.disabled);
+        if (tallas.length > 0 && !tallas.some(t => parseInt(t.value) > 0)) {
             Swal.fire({ icon: 'warning', title: 'Stock', text: 'Define stock mayor a 0 en al menos una talla' });
             return false;
         }
