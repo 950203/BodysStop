@@ -63,7 +63,6 @@ $count = array_sum($_SESSION['cart'] ?? []);
                 <a href="/?c=AdminProducto&m=stock">Stock</a>
                 <a href="/?c=AdminPedido&m=index">Pedidos</a>
                 <a href="/?c=AdminPedido&m=ventas">Ventas</a>
-                <a href="/?c=AdminPedido&m=dashboard">Dashboard</a>
             <?php endif ?>
 
             <?php if ($rol === Auth::ROL_ADMIN): ?>

@@ -66,4 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    // Mostrar / ocultar contraseña
+    document.querySelectorAll('.pass-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const span = document.querySelector('.pass-text[data-id="' + btn.dataset.id + '"]');
+            if (!span) return;
+            if (span.classList.toggle('pass-hidden')) {
+                span.textContent = '••••••••';
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                span.textContent = btn.dataset.valor;
+                btn.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+    });
 });

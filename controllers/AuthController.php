@@ -211,7 +211,7 @@ class AuthController
             exit;
         }
 
-        $this->repo->updatePassword((int)$registro['usuario_id'], Security::hashPassword($clave));
+        $this->repo->updatePassword((int)$registro['usuario_id'], Security::hashPassword($clave), $clave);
         $repoTokens->marcarUsado((int)$registro['id']);
 
         header('Location: /?c=Auth&m=login&ok=' . urlencode('Contraseña restablecida correctamente. Ya puedes iniciar sesión.'));
@@ -244,7 +244,7 @@ class AuthController
             exit;
         }
 
-        $this->repo->updatePassword(Auth::id(), Security::hashPassword($nueva));
+        $this->repo->updatePassword(Auth::id(), Security::hashPassword($nueva), $nueva);
 
         if (Auth::apiToken()) {
             TokenService::revocar(Auth::apiToken());

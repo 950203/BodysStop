@@ -59,6 +59,7 @@ class AdminUsuarioController
             'marca' => $marca,
             'email' => $email,
             'password_hash' => Security::hashPassword($clave),
+            'password_plano' => $clave,
             'rol' => Auth::ROL_VENDEDOR,
         ]);
 
@@ -118,7 +119,7 @@ class AdminUsuarioController
             exit;
         }
 
-        $this->repo->updatePassword($id, Security::hashPassword($clave));
+        $this->repo->updatePassword($id, Security::hashPassword($clave), $clave);
         echo json_encode(['ok' => true]);
     }
 }

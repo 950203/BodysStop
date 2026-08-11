@@ -141,11 +141,22 @@ class PedidoRepository
         return $pedidos;
     }
 
-    // Todos los pedidos con filtro opcional por estado/búsqueda y paginación
-    public function todos(?string $estado = null, string $busqueda = '', int $pagina = 1, int $porPagina = 10): array
+    // Todos los pedidos con filtro opcional por estado/búsqueda y paginación.
+    // Si $vendedorId se indica, solo se muestran pedidos que contienen productos de ese vendedor.
+    public function todos(?string $estado = null, string $busqueda = '', int $pagina = 1, int $porPagina = 10, ?int $vendedorId = null): array
     {
         $sql = "FROM pedidos WHERE 1=1";
         $params = [];
+
+        if ($vendedorId !== null) {
+            $sql .= " AND id IN (
+                SELECT DISTINCT pd.pedido_id
+                FROM pedido_detalle pd
+                JOIN productos p ON p.id = pd.producto_id
+                WHERE p.vendedor_id = ?
+            )";
+            $params[] = $vendedorId;
+        }
 
         if ($estado !== null && $estado !== '') {
             $sql .= " AND estado = ?";
@@ -188,7 +199,8 @@ class PedidoRepository
         }
 
         $stmtDetalle = $this->db->prepare(
-            "SELECT pd.*, p.nombre AS producto_nombre, p.imagen AS producto_imagen
+            "SELECT pd.*, p.nombre AS producto_nombre, p.imagen AS producto_imagen,
+                    p.marca AS producto_marca, p.vendedor_id AS producto_vendedor_id
              FROM pedido_detalle pd
              JOIN productos p ON p.id = pd.producto_id
              WHERE pd.pedido_id = ?"

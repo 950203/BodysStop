@@ -22,6 +22,7 @@
                 <div class="card-body">
                     <form method="POST" action="/?c=AdminUsuario&m=storeVendedor" autocomplete="off">
                         <input type="hidden" name="csrf_token" value="<?= Security::csrfToken() ?>">
+                        <input type="hidden" name="api_token" value="<?= Auth::apiToken() ?>">
 
                         <div class="mb-3">
                             <label class="form-label small text-muted">Nombre completo</label>
@@ -63,6 +64,7 @@
                                 <th>Nombre</th>
                                 <th>Marca</th>
                                 <th>Correo</th>
+                                <th>Contraseña</th>
                                 <th>Rol</th>
                                 <th>Estado</th>
                                 <th class="text-end">Acciones</th>
@@ -75,6 +77,16 @@
                                     <td class="fw-semibold"><?= Security::escape($u['nombre']) ?></td>
                                     <td><?= !empty($u['marca']) ? Security::escape($u['marca']) : '<span class="text-muted">—</span>' ?></td>
                                     <td><?= Security::escape($u['email']) ?></td>
+                                    <td>
+                                        <?php if (!empty($u['password_plano'])): ?>
+                                            <span class="pass-text" data-id="<?= $u['id'] ?>"><?= Security::escape($u['password_plano']) ?></span>
+                                            <button class="btn btn-link btn-sm p-0 ms-1 pass-toggle" data-id="<?= $u['id'] ?>" data-valor="<?= Security::escape($u['password_plano']) ?>" type="button" title="Mostrar / ocultar">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <select class="form-select form-select-sm rol-select" data-id="<?= $u['id'] ?>" <?= $u['id'] === Auth::id() ? 'disabled' : '' ?>>
                                             <?php foreach (['usuario', 'vendedor', 'administrador'] as $r): ?>

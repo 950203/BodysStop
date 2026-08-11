@@ -22,6 +22,7 @@ CREATE TABLE `usuarios` (
   `cedula` varchar(20) DEFAULT NULL,
   `email` varchar(160) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
+  `password_plano` varchar(255) DEFAULT NULL,
   `rol` enum('usuario','vendedor','administrador') NOT NULL DEFAULT 'usuario',
   `activo` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -36,12 +37,12 @@ CREATE TABLE `usuarios` (
 -- Contraseñas seed: Admin123! (admin) / Vendedor123! (vendedores)
 --
 
-INSERT INTO `usuarios` (`nombre`, `marca`, `email`, `password_hash`, `rol`) VALUES
-('Administrador', NULL, 'admin@BodyStop.com', '$2y$10$2UOLBwBrZlfz6nYyeSMKQ.Sx2tSz4Tab3c6LgS6EdsvpYhaehJ1jS', 'administrador'),
-('Vendedor Demo', 'BodyStop', 'vendedor@BodyStop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'vendedor'),
-('Laura Gomez', 'Cuerpo Fino', 'laura.gomez@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'vendedor'),
-('Mariana Ruiz', 'BodyTrend', 'mariana.ruiz@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'vendedor'),
-('Camila Torres', 'FitMotion', 'camila.torres@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'vendedor');
+INSERT INTO `usuarios` (`nombre`, `marca`, `email`, `password_hash`, `password_plano`, `rol`) VALUES
+('Administrador', NULL, 'admin@BodyStop.com', '$2y$10$2UOLBwBrZlfz6nYyeSMKQ.Sx2tSz4Tab3c6LgS6EdsvpYhaehJ1jS', 'Admin123!', 'administrador'),
+('Vendedor Demo', 'BodyStop', 'vendedor@BodyStop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'Vendedor123!', 'vendedor'),
+('Laura Gomez', 'Cuerpo Fino', 'laura.gomez@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'Vendedor123!', 'vendedor'),
+('Mariana Ruiz', 'BodyTrend', 'mariana.ruiz@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'Vendedor123!', 'vendedor'),
+('Camila Torres', 'FitMotion', 'camila.torres@bodystop.com', '$2y$10$Jqeqf2FcpgDqtR5DXsJXHe6cvu8yx7US.6brqKcDghArLt4n4ojwm', 'Vendedor123!', 'vendedor');
 
 -- --------------------------------------------------------
 

@@ -6,11 +6,26 @@ function headers() {
 }
 
 function requiereLogin() {
-    if (!window.API_TOKEN) {
-        window.location.href = '/?c=Auth&m=login';
-        return true;
-    }
-    return false;
+    if (window.API_TOKEN) return false;
+
+    Swal.fire({
+        icon: 'info',
+        title: 'Debes tener una cuenta',
+        text: 'Regístrate o inicia sesión para agregar productos al carrito.',
+        showCancelButton: true,
+        confirmButtonColor: '#000',
+        cancelButtonColor: '#333',
+        confirmButtonText: 'Registrarse',
+        cancelButtonText: 'Iniciar sesión'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/?c=Auth&m=register';
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            window.location.href = '/?c=Auth&m=login';
+        }
+    });
+
+    return true;
 }
 
 function notificar(data) {

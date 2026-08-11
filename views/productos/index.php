@@ -11,7 +11,7 @@
         <div class="col-md-5 col-lg-4">
             <div class="input-group">
                 <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                <input type="text" name="q" class="form-control" placeholder="Buscar producto..." value="<?= htmlspecialchars($busqueda) ?>">
+                <input type="search" name="q" class="form-control" placeholder="Buscar producto..." value="<?= htmlspecialchars($busqueda) ?>">
             </div>
         </div>
         <div class="col-md-3 col-lg-2">
@@ -24,6 +24,9 @@
         </div>
         <div class="col-auto">
             <button class="btn btn-dark"><i class="fas fa-filter me-1"></i> Buscar</button>
+            <a href="/?c=Producto&m=index" class="btn btn-outline-secondary" title="Borrar búsqueda y filtros">
+                <i class="fas fa-times me-1"></i> Limpiar
+            </a>
         </div>
         <?php if ($categoriaId): ?>
             <input type="hidden" name="categoria" value="<?= $categoriaId ?>">
@@ -31,10 +34,10 @@
     </form>
 
     <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
-        <a href="/?c=Producto&m=index<?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?><?= $talla ? '&talla=' . urlencode($talla) : '' ?>"
+        <a href="/?c=Producto&m=index"
            class="btn btn-sm rounded-pill <?= !$categoriaId ? 'btn-dark' : 'btn-outline-dark' ?>">Todos</a>
         <?php foreach ($categorias as $cat): ?>
-            <a href="/?c=Producto&m=index&categoria=<?= $cat['id'] ?><?= $busqueda ? '&q=' . urlencode($busqueda) : '' ?><?= $talla ? '&talla=' . urlencode($talla) : '' ?>"
+            <a href="/?c=Producto&m=index&categoria=<?= $cat['id'] ?>"
                class="btn btn-sm rounded-pill <?= $categoriaId === (int)$cat['id'] ? 'btn-dark' : 'btn-outline-dark' ?>">
                 <?= htmlspecialchars($cat['nombre']) ?> (<?= $cat['total_productos'] ?>)
             </a>
@@ -70,11 +73,12 @@
                                 <div class="small text-muted mb-1"><i class="fas fa-store me-1"></i><?= htmlspecialchars($p['marca']) ?></div>
                             <?php endif; ?>
                             <p class="product-price">$<?= number_format($p['precio']) ?></p>
-                            <?php $disponible = array_filter($p['tallas'] ?? [], fn($t) => (int)$t['stock'] > 0); ?>
+                            <?php $tallasProducto = $p['tallas'] ?? []; ?>
+                            <?php $disponible = array_filter($tallasProducto, fn($t) => (int)$t['stock'] > 0); ?>
                             <?php if (empty($disponible)): ?>
                                 <button class="btn-add-cart" disabled>Sin stock</button>
                             <?php else: ?>
-                                <button class="btn-add-cart" onclick="abrirTallas(<?= $p['id'] ?>, '<?= htmlspecialchars(addslashes($p['nombre'])) ?>', <?= (int)$p['precio'] ?>, '<?= htmlspecialchars(addslashes($p['imagen'])) ?>', <?= json_encode(array_map(fn($t) => ['talla' => $t['talla'], 'stock' => (int)$t['stock']], $disponible)) ?>)">
+                                <button class="btn-add-cart" onclick="abrirTallas(<?= $p['id'] ?>, '<?= htmlspecialchars(addslashes($p['nombre'])) ?>', <?= (int)$p['precio'] ?>, '<?= htmlspecialchars(addslashes($p['imagen'])) ?>', <?= json_encode(array_map(fn($t) => ['talla' => $t['talla'], 'stock' => (int)$t['stock']], $tallasProducto)) ?>)">
                                     <i class="fas fa-shopping-bag me-1"></i> Agregar
                                 </button>
                             <?php endif; ?>
@@ -134,6 +138,7 @@
     let modalSeleccion = { id: null, talla: null };
 
     function abrirTallas(id, nombre, precio, imagen, tallas) {
+        if (requiereLogin()) return;
         modalSeleccion = { id, talla: null };
         document.getElementById('modal-img').src = imagen;
         document.getElementById('modal-nombre').textContent = nombre;
@@ -147,12 +152,18 @@
             b.className = 'btn btn-sm btn-outline-dark rounded-pill talla-btn';
             b.textContent = t.talla + ' (' + t.stock + ')';
             b.dataset.talla = t.talla;
-            b.addEventListener('click', () => {
-                cont.querySelectorAll('.talla-btn').forEach(x => x.classList.remove('btn-dark'));
-                b.classList.add('btn-dark');
-                modalSeleccion.talla = t.talla;
-                document.getElementById('modal-info').textContent = 'Talla seleccionada: ' + t.talla;
-            });
+            if (t.stock <= 0) {
+                b.disabled = true;
+                b.className += ' disabled opacity-50';
+                b.title = 'Sin stock';
+            } else {
+                b.addEventListener('click', () => {
+                    cont.querySelectorAll('.talla-btn').forEach(x => x.classList.remove('btn-dark'));
+                    b.classList.add('btn-dark');
+                    modalSeleccion.talla = t.talla;
+                    document.getElementById('modal-info').textContent = 'Talla seleccionada: ' + t.talla;
+                });
+            }
             cont.appendChild(b);
         });
 

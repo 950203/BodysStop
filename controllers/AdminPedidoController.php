@@ -15,7 +15,8 @@ class AdminPedidoController
         $this->repo = new PedidoRepository();
     }
 
-    // Listado de pedidos con filtros
+    // Listado de pedidos con filtros.
+    // El administrador ve todos; el vendedor solo los que contienen su marca/productos.
     public function index()
     {
         Auth::requireLogin([Auth::ROL_VENDEDOR, Auth::ROL_ADMIN]);
@@ -24,7 +25,9 @@ class AdminPedidoController
         $busqueda = trim($_GET['busqueda'] ?? '');
         $pagina = max(1, (int)($_GET['pagina'] ?? 1));
 
-        $data = $this->repo->todos($estado, $busqueda, $pagina, 10);
+        $vendedorId = Auth::rol() === Auth::ROL_ADMIN ? null : Auth::id();
+
+        $data = $this->repo->todos($estado, $busqueda, $pagina, 10, $vendedorId);
         $pedidos = $data['pedidos'];
         $total = $data['total'];
         $paginas = $data['paginas'];
@@ -43,6 +46,15 @@ class AdminPedidoController
         if (!$pedido) {
             header('Location: /?c=AdminPedido&m=index&error=' . urlencode('Pedido no encontrado.'));
             exit;
+        }
+
+        // El vendedor solo ve sus propias marcas/líneas dentro del pedido
+        if (Auth::rol() === Auth::ROL_VENDEDOR) {
+            $pedido['detalle'] = array_values(array_filter(
+                $pedido['detalle'],
+                fn($d) => (int)$d['producto_vendedor_id'] === (int)Auth::id()
+            ));
+            $pedido['total'] = array_sum(array_map(fn($d) => (float)$d['subtotal'], $pedido['detalle']));
         }
 
         require BASE_PATH . '/views/admin/pedidos/ver.php';
@@ -106,10 +118,10 @@ class AdminPedidoController
         require BASE_PATH . '/views/admin/pedidos/ventas.php';
     }
 
-    // Dashboard de métricas
+    // Dashboard de métricas (solo administrador)
     public function dashboard()
     {
-        Auth::requireLogin([Auth::ROL_VENDEDOR, Auth::ROL_ADMIN]);
+        Auth::requireLogin([Auth::ROL_ADMIN]);
 
         $metricas = $this->repo->metricas();
         $masVendidos = $this->repo->masVendidos();

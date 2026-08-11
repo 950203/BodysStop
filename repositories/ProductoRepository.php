@@ -35,8 +35,10 @@ class ProductoRepository
         $params = [];
 
         if ($busqueda !== '') {
-            $sql .= " AND (p.nombre LIKE ? OR p.descripcion LIKE ?)";
+            $sql .= " AND (p.nombre LIKE ? OR p.descripcion LIKE ? OR p.marca LIKE ? OR c.nombre LIKE ?)";
             $like = '%' . $busqueda . '%';
+            $params[] = $like;
+            $params[] = $like;
             $params[] = $like;
             $params[] = $like;
         }

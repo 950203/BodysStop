@@ -13,7 +13,7 @@ class UsuarioRepository
 
     public function all(): array
     {
-        $stmt = $this->db->query("SELECT id, nombre, marca, email, rol, activo, created_at FROM usuarios ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT id, nombre, marca, email, password_plano, rol, activo, created_at FROM usuarios ORDER BY id DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -23,7 +23,7 @@ class UsuarioRepository
         $offset = max(0, ($pagina - 1) * $porPagina);
 
         $stmt = $this->db->prepare(
-            "SELECT id, nombre, marca, email, rol, activo, created_at
+            "SELECT id, nombre, marca, email, password_plano, rol, activo, created_at
              FROM usuarios ORDER BY id DESC LIMIT $porPagina OFFSET $offset"
         );
         $stmt->execute();
@@ -82,14 +82,16 @@ class UsuarioRepository
     public function create(array $data): int
     {
         $stmt = $this->db->prepare(
-            "INSERT INTO usuarios (nombre, marca, cedula, email, password_hash, rol) VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO usuarios (nombre, marca, cedula, email, password_hash, password_plano, rol) VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
+        $cedula = trim($data['cedula'] ?? '');
         $stmt->execute([
             $data['nombre'],
             $data['marca'] ?? null,
-            $data['cedula'] ?? '',
+            $cedula !== '' ? $cedula : null,
             $data['email'],
             $data['password_hash'],
+            $data['password_plano'] ?? null,
             $data['rol'] ?? 'usuario',
         ]);
         return (int)$this->db->lastInsertId();
@@ -118,10 +120,10 @@ class UsuarioRepository
         return $stmt->execute([$data['nombre'], $data['email'], $id]);
     }
 
-    public function updatePassword(int $id, string $hash): bool
+    public function updatePassword(int $id, string $hash, ?string $plano = null): bool
     {
-        $stmt = $this->db->prepare("UPDATE usuarios SET password_hash = ? WHERE id = ?");
-        return $stmt->execute([$hash, $id]);
+        $stmt = $this->db->prepare("UPDATE usuarios SET password_hash = ?, password_plano = ? WHERE id = ?");
+        return $stmt->execute([$hash, $plano, $id]);
     }
 
     public function setActivo(int $id, bool $activo): bool

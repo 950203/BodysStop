@@ -4,7 +4,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="fw-light mb-0" style="letter-spacing:1px;">Gestión de Pedidos</h1>
         <div>
-            <a href="/?c=AdminPedido&m=dashboard" class="btn btn-outline-dark btn-sm"><i class="fas fa-chart-pie me-1"></i> Dashboard</a>
+            <?php if (Auth::rol() === Auth::ROL_ADMIN): ?>
+                <a href="/?c=AdminPedido&m=dashboard" class="btn btn-outline-dark btn-sm"><i class="fas fa-chart-pie me-1"></i> Dashboard</a>
+            <?php endif; ?>
             <span class="badge bg-dark ms-2"><i class="fas fa-box me-1"></i> <?= Auth::rol() === Auth::ROL_ADMIN ? 'Administrador' : 'Vendedor' ?></span>
         </div>
     </div>
